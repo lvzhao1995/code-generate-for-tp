@@ -21,7 +21,7 @@
         methods: {
             save() {
                 this.formLoading = true;
-                this.$httpRequest("/admin/{{hxc_controller_name}}/add", "post", this.formData).then(res => {
+                this.$httpRequest("/admin/{{controller_name}}/add", "post", this.formData).then(res => {
                     this.formLoading = false;
                     if (res.code == 1) {
                         this.$Message.success("操作成功");

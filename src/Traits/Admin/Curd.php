@@ -14,7 +14,6 @@ use think\Validate;
 
 /**
  * Trait curd
- * @package app\admin\library\hxc
  * @property $countField
  * @property $modelName
  * @property $searchField
@@ -93,7 +92,6 @@ trait Curd
 
     /**
      * 条件查询
-     * @param Request $request
      * @param $params
      * @param $special
      * @param $relationSearch

@@ -8,7 +8,7 @@ use think\response\Json;
 
 /**
  * Trait Curd
- * @package Hxc\Curd\Traits\App
+ * @package Generate\Traits\App
  * @property string $model
  * @property string $with
  * @property string $cache

@@ -55,7 +55,7 @@ class Generate extends Command
             //配置文件已存在
             $file = realpath(__DIR__ . '/../config.php');
             $output->writeln('---------------------------------------');
-            $output->warning('The configuration file(' . realpath($targetPath . 'curd.php') . ') already exists. Please check' . $file . 'to confirm if it is updated.');
+            $output->warning('The configuration file(' . realpath($targetPath . 'curd.php') . ') already exists. Please check ' . $file . ' to confirm if it is updated.');
         } else {
             copy(__DIR__ . '/../config.php', $targetPath . 'curd.php');
         }

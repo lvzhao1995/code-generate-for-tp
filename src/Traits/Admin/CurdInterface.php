@@ -12,7 +12,7 @@ interface CurdInterface
      * @param Query|Model $sql 当前查询sql语句
      * @return Query
      */
-    public function indexQuery($sql);
+    public function indexQuery(Query $sql);
 
     /**
      * 输出到列表视图的数据捕获

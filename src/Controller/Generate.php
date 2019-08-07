@@ -266,8 +266,8 @@ class Generate extends Controller
 <?php
 namespace app\app\controller;
 
-use Hxc\Curd\Traits\App\Common;
-use Hxc\Curd\Traits\App\Curd;
+use Generate\Traits\App\Common;
+use Generate\Traits\App\Curd;
 
 class {$controllerName} {$extends}
 {
@@ -797,9 +797,9 @@ CODE;
 <?php
 namespace app\admin\controller;
 
-use Hxc\Curd\Traits\Admin\Common;
-use Hxc\Curd\Traits\Admin\Curd;
-use Hxc\Curd\Traits\Admin\CurdInterface;
+use Generate\Traits\Admin\Common;
+use Generate\Traits\Admin\Curd;
+use Generate\Traits\Admin\CurdInterface;
 
 class {$controllerName} extends {$baseController} implements curdInterface
 {
@@ -899,7 +899,7 @@ CODE;
         $code = file_get_contents($templatePath);
         $tableColumns = empty($tableColumns) ? '[]' : json_encode($tableColumns, JSON_UNESCAPED_UNICODE);
         $searchField = empty($searchField) ? '{}' : json_encode($searchField, JSON_UNESCAPED_UNICODE);
-        $code = str_replace(['{{hxc_search_form}}', '{{hxc_table_columns}}', '{{hxc_search_field}}', '{{hxc_controller_name}}'], [$searchHtml, $tableColumns, $searchField, $viewDirName], $code);
+        $code = str_replace(['{{search_form}}', '{{table_columns}}', '{{search_field}}', '{{controller_name}}'], [$searchHtml, $tableColumns, $searchField, $viewDirName], $code);
         $this->createPath($viewDir);
         file_put_contents($viewPath, $code);
         return true;
@@ -952,7 +952,7 @@ CODE;
         }
         $code = file_get_contents($templatePath);
         $formField = empty($formField) ? '{}' : json_encode($formField, JSON_UNESCAPED_UNICODE);
-        $code = str_replace(['{{curd_form_group}}', '{{curd_form_field}}', '{{hxc_controller_name}}'], [$html, $formField, $viewDirName], $code);
+        $code = str_replace(['{{curd_form_group}}', '{{curd_form_field}}', '{{controller_name}}'], [$html, $formField, $viewDirName], $code);
         $this->createPath($viewDir);
         file_put_contents($viewPath, $code);
         return true;
@@ -1007,7 +1007,7 @@ CODE;
         }
         $code = file_get_contents($templatePath);
         $formField = empty($formField) ? '{}' : json_encode($formField, JSON_UNESCAPED_UNICODE);
-        $code = str_replace(['{{curd_form_group}}', '{{curd_form_field}}', '{{hxc_controller_name}}'], [$html, $formField, $viewDirName], $code);
+        $code = str_replace(['{{curd_form_group}}', '{{curd_form_field}}', '{{controller_name}}'], [$html, $formField, $viewDirName], $code);
         $this->createPath($viewDir);
         file_put_contents($viewPath, $code);
         return true;
@@ -1060,7 +1060,7 @@ META;
             return '模型已存在';
         }
         $mainCode = '';
-        $use = "use think\Model;\nuse Hxc\Curd\Traits\Model\Cache;";
+        $use = "use think\Model;\nuse Generate\Traits\Model\Cache;";
         $time_status = 'false';
         if (in_array('开启软删', $data['model'])) {
             $use .= "use traits\model\SoftDelete;\n";

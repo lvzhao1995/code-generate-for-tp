@@ -8,20 +8,20 @@
     <script src="https://unpkg.com/iview@3.4.2/dist/iview.min.js"></script>
     <script src="https://unpkg.com/axios@0.19.0/dist/axios.min.js"></script>
     <style>
-        .hxc-heder {
+        .header {
             color: white;
             text-align: center;
         }
 
-        .hxc-footer {
+        .footer {
             text-align: center;
         }
 
-        .hxc-table-wrap {
+        .table-wrap {
             margin-bottom: 20px;
         }
 
-        .hxc-content {
+        .content {
             padding: 20px;
         }
     </style>
@@ -29,7 +29,7 @@
 <body>
 <div id="app">
     <i-layout>
-        <i-header class="hxc-heder">
+        <i-header class="header">
             <h3>
                 {{titleStatus == 1 ? `桥通天下Qframe框架代码生成工具（${create.selectVal}）`: '桥通天下Qframe框架关联关系生成'}}
                 <Dropdown @on-click="dropdownClick">
@@ -44,16 +44,16 @@
                 </Dropdown>
             </h3>
         </i-header>
-        <i-content class="hxc-content" v-if="titleStatus==1">
+        <i-content class="content" v-if="titleStatus==1">
             <alert closable>* 模型位于application/common/model目录，前后台通用。</alert>
-            <div class="hxc-table-wrap">
+            <div class="table-wrap">
                 <span>业务选择：</span>
                 <radio-group type="button" v-model="create.selectVal">
                     <Radio label="前台">前台</Radio>
                     <Radio label="后台">后台</Radio>
                 </radio-group>
             </div>
-            <div class="hxc-table-wrap">
+            <div class="table-wrap">
                 数据表：
                 <i-select style="width:200px" v-model="tableName" @on-change="tableChange" filterable>
                     <i-option v-for="item in tableData" :value="item.value" :key="item.value">{{ item.label }}
@@ -164,8 +164,8 @@
                       @click.native="generate">生成代码
             </i-button>
         </i-content>
-        <i-content class="hxc-content" v-else>
-            <div class="hxc-table-wrap">
+        <i-content class="content" v-else>
+            <div class="table-wrap">
                 模型：
                 <i-select style="width:200px" v-model="tableName" @on-change="modelChange">
                     <i-option v-for="item in modelData" :value="item.value" :key="item.value">{{ item.label }}
@@ -192,7 +192,7 @@
                       @click.native="generateRelation">生成关联关系
             </i-button>
         </i-content>
-        <i-footer class="hxc-footer">桥通天下©2018-2019</i-footer>
+        <i-footer class="footer">桥通天下©2018-2019</i-footer>
     </i-layout>
 </div>
 </body>

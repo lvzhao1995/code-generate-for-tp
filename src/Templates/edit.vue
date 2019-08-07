@@ -17,7 +17,7 @@
         };
         },
         created() {
-            this.$httpRequest("/admin/{{hxc_controller_name}}/edit", "get", {
+            this.$httpRequest("/admin/{{controller_name}}/edit", "get", {
                 id: this.$route.query.id
             }).then(res => {
                 if (res.code == 1) {
@@ -30,7 +30,7 @@
         methods: {
             save() {
                 this.formLoading = true;
-                this.$httpRequest("/admin/{{hxc_controller_name}}/edit", "post", this.formData).then(res => {
+                this.$httpRequest("/admin/{{controller_name}}/edit", "post", this.formData).then(res => {
                     this.formLoading = false;
                     if (res.code == 1) {
                         this.$Message.success("操作成功");

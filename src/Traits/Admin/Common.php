@@ -4,6 +4,8 @@ namespace Generate\Traits\Admin;
 
 
 use Generate\Traits\JsonReturn;
+use think\db\Query;
+use think\Model;
 
 trait Common
 {
@@ -11,10 +13,10 @@ trait Common
 
     /**
      * 列表查询sql捕获
-     * @param \think\db\Query|\think\Model $sql
-     * @return \think\db\Query
+     * @param Query|Model $sql
+     * @return Query
      */
-    public function indexQuery($sql)
+    public function indexQuery(Query $sql)
     {
         return $sql;
     }
@@ -38,7 +40,6 @@ trait Common
     public function indexAssign($data)
     {
         $data['lists'] = [
-            'hxc' => []
         ];
         return $data;
     }
@@ -51,7 +52,6 @@ trait Common
     public function addAssign($data)
     {
         $data['lists'] = [
-            'hxc' => []
         ];
         return $data;
     }

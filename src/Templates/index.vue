@@ -1,10 +1,10 @@
 <template>
     <div>
         <Form :model="searchData" inline @submit.native.prevent="changePage(1)" :label-width="80">
-            {{hxc_search_form}}
+            {{search_form}}
             <Row>
                 <Col span="12">
-                <Button icon="ios-add" v-auth to="/{{hxc_controller_name}}/add">添加</Button>
+                <Button icon="ios-add" v-auth to="/{{controller_name}}/add">添加</Button>
                 </Col>
                 <Col span="12">
                 <div style="text-align:right">
@@ -24,7 +24,7 @@
                         type="primary"
                         size="small"
                         v-auth
-                        :to="'/{{hxc_controller_name}}/edit?id='+row.id"
+                        :to="'/{{controller_name}}/edit?id='+row.id"
                 >编辑</Button>
                 <Button type="error" size="small" v-auth="deleteUrl" @click="remove(row.id)">删除</Button>
             </template>
@@ -44,7 +44,7 @@
     export default {
         data() {
             return {
-                tableColumns:{{hxc_table_columns}},
+                tableColumns:{{table_columns}},
                 tableData: {
                     total: 0,
                     per_page: 0,
@@ -52,8 +52,8 @@
                     last_page: 1,
                     data: []
                 },
-                indexUrl:"/admin/{{hxc_controller_name}}/index",
-                deleteUrl:"/admin/{{hxc_controller_name}}/delete",
+                indexUrl:"/admin/{{controller_name}}/index",
+                deleteUrl:"/admin/{{controller_name}}/delete",
             };
         },
         mixins: [indexPage],
