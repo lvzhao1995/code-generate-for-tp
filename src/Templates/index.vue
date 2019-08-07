@@ -1,0 +1,61 @@
+<template>
+    <div>
+        <Form :model="searchData" inline @submit.native.prevent="changePage(1)" :label-width="80">
+            {{hxc_search_form}}
+            <Row>
+                <Col span="12">
+                <Button icon="ios-add" v-auth to="/{{hxc_controller_name}}/add">添加</Button>
+                </Col>
+                <Col span="12">
+                <div style="text-align:right">
+                    <Button type="primary" icon="ios-search" html-type="submit">搜索</Button>
+                </div>
+                </Col>
+            </Row>
+        </Form>
+        <Table
+                :columns="tableColumns"
+                :data="tableData.data"
+                :loading="tableLoading"
+                style="margin-top:20px;"
+        >
+            <template slot-scope="{ row }" slot="action">
+                <Button
+                        type="primary"
+                        size="small"
+                        v-auth
+                        :to="'/{{hxc_controller_name}}/edit?id='+row.id"
+                >编辑</Button>
+                <Button type="error" size="small" v-auth="deleteUrl" @click="remove(row.id)">删除</Button>
+            </template>
+        </Table>
+        <Page
+                style="text-align:right;margin-top:20px"
+                :total="tableData.total"
+                :page-size="tableData.per_page"
+                :current="tableData.current_page"
+                show-total
+                @on-change="changePage"
+        />
+    </div>
+</template>
+<script>
+    import indexPage from "../../mixins/indexPage";
+    export default {
+        data() {
+            return {
+                tableColumns:{{hxc_table_columns}},
+                tableData: {
+                    total: 0,
+                    per_page: 0,
+                    current_page: 1,
+                    last_page: 1,
+                    data: []
+                },
+                indexUrl:"/admin/{{hxc_controller_name}}/index",
+                deleteUrl:"/admin/{{hxc_controller_name}}/delete",
+            };
+        },
+        mixins: [indexPage],
+    };
+</script>

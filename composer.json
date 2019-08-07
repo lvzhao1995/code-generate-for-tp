@@ -1,0 +1,29 @@
+{
+    "name": "hxc/curd",
+    "description": "TP5.0生成工具的CURD",
+    "license": "MIT",
+    "type": "qt-extend",
+    "authors": [
+        {
+            "name": "lvzhao1995",
+            "email": "abc-1.2@qq.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=5.6.0",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "topthink/framework": "5.0.*",
+        "hxc/qt-installer": "^1.0",
+        "guzzlehttp/guzzle": "^6.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Generate\\": "src/"
+        },
+        "files": [
+            "src/common.php"
+        ]
+    }
+}
