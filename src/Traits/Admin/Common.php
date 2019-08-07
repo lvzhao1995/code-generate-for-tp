@@ -16,7 +16,7 @@ trait Common
      * @param Query|Model $sql
      * @return Query
      */
-    public function indexQuery(Query $sql)
+    public function indexQuery($sql)
     {
         return $sql;
     }
