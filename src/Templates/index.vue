@@ -26,7 +26,16 @@
                         v-auth
                         :to="'/{{controller_name}}/edit?id='+row.id"
                 >编辑</Button>
-                <Button type="error" size="small" v-auth="deleteUrl" @click="remove(row.id)">删除</Button>
+                <Poptip
+                        v-auth="'{{controller_name}}/delete'"
+                        transfer
+                        confirm
+                        title="您确定要删除这条数据吗？"
+                        @on-ok="remove(row.id)"
+                        style="margin-left:5px"
+                >
+                    <Button type="error" size="small">删除</Button>
+                </Poptip>
             </template>
         </Table>
         <Page
