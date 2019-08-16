@@ -337,11 +337,11 @@ class {$controllerName} extends Validate
 {
     protected \$rule = [
         'id' => 'require'
+        {$rule}
     ];
 
     protected \$message = [
         'id.require'  =>  'id不能为空',
-        {$rule}
     ];
 
     protected \$scene = [
@@ -1027,19 +1027,19 @@ CODE;
         $meta = <<<META
 index:
   breadcrumb: 
-    - name: $showName
+    - title: $showName
   title: $showName
 add:
   breadcrumb: 
-    - name: $showName
+    - title: $showName
       to: /$dir
-    - name: 添加
+    - title: 添加
   title: 添加$showName
 edit:
   breadcrumb: 
-    - name: $showName
+    - title: $showName
       to: /$dir
-    - name: 修改
+    - title: 修改
   title: 修改$showName
 META;
         $this->createPath($viewDir);

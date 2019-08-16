@@ -10,6 +10,7 @@
     </div>
 </template>
 <script>
+    import { mapMutations } from "vuex";
     export default {
         data() {
             return {
@@ -18,7 +19,7 @@
         };
         },
         created() {
-            this.$httpRequest("/admin/{{controller_name}}/edit", "get", {
+            this.$get("/admin/{{controller_name}}/edit", {
                 id: this.$route.query.id
             }).then(res => {
                 if (res.code == 1) {
@@ -29,13 +30,14 @@
             });
         },
         methods: {
+            ...mapMutations(["closeTag"]),
             save() {
                 this.formLoading = true;
                 this.$httpRequest("/admin/{{controller_name}}/edit", "post", this.formData).then(res => {
                     this.formLoading = false;
                     if (res.code == 1) {
                         this.$Message.success("操作成功");
-                        this.$router.go(-1);
+                        this.closeTag(this.$route);
                     } else {
                         this.$Message.error(res.msg);
                     }

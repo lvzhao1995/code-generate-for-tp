@@ -10,6 +10,7 @@
     </div>
 </template>
 <script>
+    import { mapMutations } from "vuex";
     export default {
         data() {
             return {
@@ -20,13 +21,14 @@
         created() {
         },
         methods: {
+            ...mapMutations(["closeTag"]),
             save() {
                 this.formLoading = true;
-                this.$httpRequest("/admin/{{controller_name}}/add", "post", this.formData).then(res => {
+                this.$axios.post("/admin/{{controller_name}}/add", this.formData).then(res => {
                     this.formLoading = false;
                     if (res.code == 1) {
                         this.$Message.success("操作成功");
-                        this.$router.go(-1);
+                        this.closeTag(this.$route);
                     } else {
                         this.$Message.error(res.msg);
                     }

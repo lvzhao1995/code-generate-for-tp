@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Form :model="searchData" inline @submit.native.prevent="changePage(1)" :label-width="80">
+        <Form :model="searchData" inline @submit.native.prevent="getData(1)" :label-width="80">
             {{search_form}}
             <Row>
                 <Col span="12">
@@ -44,7 +44,7 @@
                 :page-size="tableData.per_page"
                 :current="tableData.current_page"
                 show-total
-                @on-change="changePage"
+                @on-change="getData"
         />
     </div>
 </template>
