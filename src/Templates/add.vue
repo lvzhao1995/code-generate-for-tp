@@ -10,30 +10,15 @@
     </div>
 </template>
 <script>
-    import { mapMutations } from "vuex";
+    import addPage from "../../mixins/addPage";
     export default {
         data() {
             return {
                 formData:{{curd_form_field}},
-                formLoading: false
+                formLoading: false,
+                addUrl: "/admin/{{controller_name}}/add"
             };
         },
-        created() {
-        },
-        methods: {
-            ...mapMutations(["closeTag"]),
-            save() {
-                this.formLoading = true;
-                this.$axios.post("/admin/{{controller_name}}/add", this.formData).then(res => {
-                    this.formLoading = false;
-                    if (res.code == 1) {
-                        this.$Message.success("操作成功");
-                        this.closeTag(this.$route);
-                    } else {
-                        this.$Message.error(res.msg);
-                    }
-                });
-            }
-        }
+        mixins: [addPage],
     };
 </script>

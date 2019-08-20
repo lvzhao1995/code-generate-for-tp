@@ -10,39 +10,15 @@
     </div>
 </template>
 <script>
-    import { mapMutations } from "vuex";
+    import editPage from "../../mixins/editPage";
     export default {
         data() {
             return {
                 formData:{{curd_form_field}},
-                formLoading: false
-        };
+                formLoading: false,
+                editUrl:"/admin/{{controller_name}}/edit"
+            };
         },
-        created() {
-            this.$get("/admin/{{controller_name}}/edit", {
-                id: this.$route.query.id
-            }).then(res => {
-                if (res.code == 1) {
-                    this.formData=res.data.data;
-                } else {
-                    this.$Message.error(res.msg);
-                }
-            });
-        },
-        methods: {
-            ...mapMutations(["closeTag"]),
-            save() {
-                this.formLoading = true;
-                this.$httpRequest("/admin/{{controller_name}}/edit", "post", this.formData).then(res => {
-                    this.formLoading = false;
-                    if (res.code == 1) {
-                        this.$Message.success("操作成功");
-                        this.closeTag(this.$route);
-                    } else {
-                        this.$Message.error(res.msg);
-                    }
-                });
-            }
-        }
+        mixins:[editPage]
     };
 </script>
