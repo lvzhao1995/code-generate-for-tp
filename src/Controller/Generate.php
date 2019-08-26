@@ -324,6 +324,9 @@ CODE;
         $rule = '';
         $scene = '';
         $deleteScene = '';
+        if (is_string($pk)) {
+            $pk = [$pk];
+        }
         foreach ($pk as $k) {
             $rule .= "        '{$k}' => 'require',\n";
             $scene .= "'{$k}',";
