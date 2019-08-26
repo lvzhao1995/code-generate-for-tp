@@ -347,7 +347,6 @@ use think\Validate;
 class {$controllerName} extends Validate
 {
     protected \$rule = [
-        'id' => 'require'
         {$rule}
     ];
 
