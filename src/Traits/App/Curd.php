@@ -71,21 +71,40 @@ trait Curd
     protected function get($request)
     {
         if ($request->isGet()) {
-            $id = $request->param('id');
-            $pageSize = $request->param('pageSize');
-            if (empty($pageSize)) {
-                $pageSize = $this->limit;
-            }
-            $sql = model($this->model)->with($this->with)->order($this->order);
+            $model = model($this->model);
+
+            $sql = $model->with($this->with)->order($this->order);
             if ($this->cache) {
                 $sql = $sql->cache(true, 0, $this->model . '_cache_data');
             }
-            if ($id) {
-                $res = $sql->field($this->detailField)->find($id);
+
+            //获取主键值
+            $pk = $model->getPk();
+            $pkValue = $request->only($pk);
+            if (is_string($pk)) {
+                $pk = [$pk];
+            }
+            //根据主键信息决定是否返回详情
+            $isDetail = true;
+            foreach ($pk as $key) {
+                if (empty($pkValue[$key])) {
+                    $isDetail = false;
+                    break;
+                }
+            }
+            if ($isDetail) {
+                //详情
+                $res = $sql->field($this->detailField)->find($pkValue);
                 if (empty($res)) {
                     $this->returnFail('数据不存在');
                 }
             } else {
+                //列表
+                //获取分页参数
+                $pageSize = $request->param('pageSize');
+                if (empty($pageSize)) {
+                    $pageSize = $this->limit;
+                }
                 $res = $sql->field($this->indexField)->paginate($pageSize);
             }
             $this->returnSuccess($res);
@@ -131,18 +150,27 @@ trait Curd
     protected function put(Request $request)
     {
         if ($request->isPut()) {
-            $id = $request->param('id');
-            if (!$id) {
-                $this->returnFail('参数有误，缺少id');
+            $model = model($this->model);
+            //获取主键
+            $pk = $model->getPk();
+            $pkValue = $request->only($pk);
+            if (is_string($pk)) {
+                $pk = [$pk];
+            }
+            foreach ($pk as $key) {
+                if (empty($pkValue[$key])) {
+                    //判断主键是否完整
+                    $this->returnFail('参数有误，缺少' . $key);
+                }
             }
             $params = $request->only($this->editField);
-            $params['id'] = $id;
+            $params = array_merge($params, $pkValue);
             $params_status = $this->validate($params, "{$this->model}.update");
             if (true !== $params_status) {
                 // 验证失败 输出错误信息
                 $this->returnFail($params_status);
             }
-            $res = model($this->model)->allowField(true)->save($params, ['id' => $params['id']]);
+            $res = $model->allowField(true)->save($params, $pkValue);
             $this->returnRes($res, '编辑失败');
         }
     }
@@ -156,13 +184,27 @@ trait Curd
     protected function delete(Request $request)
     {
         if ($request->isDelete()) {
+            $model = model($this->model);
+            //获取主键
+            $pk = $model->getPk();
+            $pkValue = $request->only($pk);
+            if (is_string($pk)) {
+                $pk = [$pk];
+            }
+            foreach ($pk as $key) {
+                if (empty($pkValue[$key])) {
+                    //判断主键是否完整
+                    $this->returnFail('参数有误，缺少' . $key);
+                }
+            }
+
             $params = $request->param();
             $params_status = $this->validate($params, "{$this->model}.delete");
             if (true !== $params_status) {
                 // 验证失败 输出错误信息
                 $this->returnFail($params_status);
             }
-            $data = model($this->model)->get($params['id']);
+            $data = model($this->model)->get($pkValue);
             if (empty($data)) {
                 $this->returnFail('数据不存在');
             }
