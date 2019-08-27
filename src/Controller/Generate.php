@@ -113,10 +113,10 @@ class Generate extends Controller
      */
     public function getModelData()
     {
-        $model_path = ROOT_PATH . 'application\common\model\*.php';
+        $model_path = ROOT_PATH . 'application' . DIRECTORY_SEPARATOR . 'common' . DIRECTORY_SEPARATOR . 'model' . DIRECTORY_SEPARATOR . '*.php';
         $res = [];
         foreach (glob($model_path) as $k => $v) {
-            $val = explode('.php', explode('\model\\', $v)[1])[0];
+            $val = explode('.php', explode(DIRECTORY_SEPARATOR . 'model' . DIRECTORY_SEPARATOR, $v)[1])[0];
             $arr = [
                 'value' => $val,
                 'label' => $val,
