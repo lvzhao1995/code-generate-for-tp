@@ -7,7 +7,7 @@ Console::addDefaultCommands([
     "Generate\\Command\\Generate",
 ]);
 
-if (defined(ROOT_PATH) && file_exists(ROOT_PATH . '/generate.lock')) {
+if (defined('ROOT_PATH') && file_exists(ROOT_PATH . '/generate.lock')) {
     Route::rule([
         'generate/showTables' => '\\Generate\\Controller\\Generate@showTables',
         'generate/getModelData' => '\\Generate\\Controller\\Generate@getModelData',
