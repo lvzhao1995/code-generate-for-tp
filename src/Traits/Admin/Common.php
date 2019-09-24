@@ -89,11 +89,11 @@ trait Common
     /**
      * 成功添加数据后的数据捕获
      * 通过$this->returnFail($message);将错误信息返回到前端，并且回滚数据
-     * @param int $id 添加后的id
+     * @param int|array $pk 添加后的主键值，多主键传入数组
      * @param mixed $data 接受的参数，包含追加的
      * @return mixed|void
      */
-    public function addEnd($id, $data)
+    public function addEnd($pk, $data)
     {
 
     }
@@ -101,11 +101,11 @@ trait Common
     /**
      * 成功编辑数据后的数据捕获
      * 通过$this->returnFail($message);将错误信息返回到前端，并且回滚数据
-     * @param int $id 编辑数据的id
+     * @param array|int $pk 编辑数据的主键值，多主键传入数组
      * @param mixed $data 接受的参数，包含追加的
      * @return void
      */
-    public function editEnd($id, $data)
+    public function editEnd($pk, $data)
     {
 
     }
@@ -113,10 +113,10 @@ trait Common
     /**
      * 成功删除数据后的数据捕获
      * 通过$this->returnFail($message);将错误信息返回到前端，并且回滚数据
-     * @param int $id 要删除数据的id
+     * @param int|array $pk 要删除数据的主键值，多主键则传入数组
      * @return mixed|void
      */
-    public function deleteEnd($id)
+    public function deleteEnd($pk)
     {
 
     }

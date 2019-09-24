@@ -9,6 +9,7 @@ use think\db\exception\ModelNotFoundException;
 use think\Exception;
 use think\exception\DbException;
 use think\exception\HttpResponseException;
+use think\Model;
 use think\Request;
 use think\Validate;
 
@@ -139,12 +140,16 @@ trait Curd
             if (!$result) {//验证不通过
                 $this->returnFail($validate->getError());
             }
+            $pk = '';
+            $pkValue = '';
             //验证通过
             Db::startTrans();
             try {
                 $model = model($this->modelName);
                 $model->allowField(true)->save($add_data);
                 $this->addEnd($model->id, $add_data);
+                $pkValue = $this->getPkValue($model, $pk);
+                $this->addEnd($pkValue, $add_data);
             } catch (HttpResponseException $e) {
                 Db::rollback();
                 throw $e;
@@ -153,9 +158,34 @@ trait Curd
                 $this->returnFail($e->getMessage());
             }
             Db::commit();
-            $this->returnSuccess(['id' => $model->id]);
+            if (!is_array($pkValue)) {
+                $pkValue = [$pk => $pkValue];
+            }
+            $this->returnSuccess($pkValue);
         }
         $this->returnSuccess($this->addAssign([]));
+    }
+
+    /**
+     * 获取模型的主键值
+     * @param Model $model
+     * @param mixed $pk
+     * @return array|mixed
+     */
+    private function getPkValue(Model $model, $pk = null)
+    {
+        if (is_null($pk)) {
+            $pk = $model->getPk();
+        }
+        if (is_array($pk)) {
+            $pkValue = [];
+            foreach ($pk as $key) {
+                $pkValue[$key] = $model->{$key};
+            }
+        } else {
+            $pkValue = $model->{$pk};
+        }
+        return $pkValue;
     }
 
     /**
@@ -168,9 +198,18 @@ trait Curd
      */
     public function edit(Request $request)
     {
-        $id = $request->param('id');
-        if (!$id) {
-            $this->returnFail('参数有误，缺少id');
+        $model = model($this->modelName);
+        $pk = $model->getPk();
+        $pkValue = $request->only($pk);
+
+        $pkArr = $pk;
+        if (is_string($pkArr)) {
+            $pkArr = [$pkArr];
+        }
+        foreach ($pkArr as $key) {
+            if (empty($pkValue[$key])) {
+                $this->returnFail('参数有误，缺少' . $key);
+            }
         }
         if ($request->isPost()) {
             $params = $request->only($this->editField);
@@ -183,8 +222,11 @@ trait Curd
             //验证通过
             Db::startTrans();
             try {
-                model($this->modelName)->allowField(true)->save($edit_data, ['id' => $id]);
-                $this->editEnd($id, $edit_data);
+                $model->allowField(true)->save($edit_data, $pkValue);
+                if (is_string($pk)) {
+                    $pkValue = $pkValue[$pk];
+                }
+                $this->editEnd($pkValue, $edit_data);
             } catch (HttpResponseException $e) {
                 Db::rollback();
                 throw $e;
@@ -195,11 +237,13 @@ trait Curd
             Db::commit();
             $this->returnSuccess();
         }
-        $data = model($this->modelName)->find($id);
-        $this->returnSuccess($this->editAssign([
-            'id' => $id,
-            'data' => $data
-        ]));
+        $data = $model->find($pkValue);
+        $res = [];
+        foreach ($pkValue as $key => $value) {
+            $res[$key] = $value;
+        }
+        $res['data'] = $data;
+        $this->returnSuccess($this->editAssign($res));
     }
 
     /**
@@ -209,15 +253,30 @@ trait Curd
      */
     public function delete(Request $request)
     {
-        $id = $request->param('id');
-        $data = model($this->modelName)->get($id);
+        $model = model($this->modelName);
+        $pk = $model->getPk();
+        $pkValue = $request->only($pk);
+
+        $pkArr = $pk;
+        if (is_string($pkArr)) {
+            $pkArr = [$pkArr];
+        }
+        foreach ($pkArr as $key) {
+            if (empty($pkValue[$key])) {
+                $this->returnFail('参数有误，缺少' . $key);
+            }
+        }
+        $data = $model->find($pkValue);
         if (empty($data)) {
             $this->returnFail();
         }
         Db::startTrans();
         try {
             $data->delete();
-            $this->deleteEnd($id);
+            if (is_string($pk)) {
+                $pkValue = $pkValue[$pk];
+            }
+            $this->deleteEnd($pkValue);
         } catch (HttpResponseException $e) {
             Db::rollback();
             throw $e;

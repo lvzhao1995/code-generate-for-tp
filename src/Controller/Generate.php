@@ -113,10 +113,10 @@ class Generate extends Controller
      */
     public function getModelData()
     {
-        $model_path = ROOT_PATH . 'application\common\model\*.php';
+        $model_path = ROOT_PATH . 'application' . DIRECTORY_SEPARATOR . 'common' . DIRECTORY_SEPARATOR . 'model' . DIRECTORY_SEPARATOR . '*.php';
         $res = [];
         foreach (glob($model_path) as $k => $v) {
-            $val = explode('.php', explode('\model\\', $v)[1])[0];
+            $val = explode('.php', explode(DIRECTORY_SEPARATOR . 'model' . DIRECTORY_SEPARATOR, $v)[1])[0];
             $arr = [
                 'value' => $val,
                 'label' => $val,
@@ -162,7 +162,8 @@ class Generate extends Controller
                     $controllerRes = $this->createAppController($data, $controllerName, $modelName);
                     $responseMessage .= ($controllerRes === true ? "控制器生成成功\n" : "$controllerRes\n") . '</br>';
                     //生成验证器
-                    $validateRes = $this->createAppValidate($data, $controllerName);
+                    $pk = Db::name($modelName)->getPk();
+                    $validateRes = $this->createAppValidate($data, $controllerName, $pk);
                     $responseMessage .= ($validateRes === true ? "验证器生成成功，请根据业务逻辑进行配置\n" : "$validateRes\n") . '</br>';
                     $documentRes = $this->createDocument($data, $controllerName, $showName, $tableName);
                     $responseMessage .= '文档生成结果：' . $documentRes . "</br>";
@@ -311,9 +312,10 @@ CODE;
      * 生成验证文件
      * @param $data
      * @param $controllerName
+     * @param $pk
      * @return bool|string
      */
-    private function createAppValidate($data, $controllerName)
+    private function createAppValidate($data, $controllerName, $pk)
     {
         $validatePath = APP_PATH . "app/validate/{$controllerName}.php";
         if (file_exists($validatePath)) {
@@ -321,6 +323,15 @@ CODE;
         }
         $rule = '';
         $scene = '';
+        $deleteScene = '';
+        if (is_string($pk)) {
+            $pk = [$pk];
+        }
+        foreach ($pk as $k) {
+            $rule .= "        '{$k}' => 'require',\n";
+            $scene .= "'{$k}',";
+            $deleteScene .= "'{$k}',";
+        }
         foreach ($data['pageData'] as $k => $v) {
             if ($v['require']) {
                 $rule .= "        '{$v['name']}|{$v['label']}' => 'require',\n";
@@ -336,17 +347,16 @@ use think\Validate;
 class {$controllerName} extends Validate
 {
     protected \$rule = [
-        'id' => 'require'
+        {$rule}
     ];
 
     protected \$message = [
         'id.require'  =>  'id不能为空',
-        {$rule}
     ];
 
     protected \$scene = [
-        'delete' => ['id'],//删
-        'update' => ['id',{$scene}],//改
+        'delete' => [{$deleteScene}],//删
+        'update' => [{$scene}],//改
         'store' => [{$scene}],//增
         'index' => [{$scene}],//查
     ];
