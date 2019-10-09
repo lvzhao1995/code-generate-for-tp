@@ -4,7 +4,7 @@ use think\Console;
 use think\Route;
 
 Console::addDefaultCommands([
-    "Generate\\Command\\Generate",
+    'Generate\\Command\\Generate',
 ]);
 
 if (defined('ROOT_PATH') && file_exists(ROOT_PATH . '/generate.lock')) {

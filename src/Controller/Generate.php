@@ -2,7 +2,6 @@
 
 namespace Generate\Controller;
 
-
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -63,12 +62,12 @@ class Generate extends Controller
         if (!$data || empty($data)) {
             $res = [
                 'code' => 0,
-                'msg' => $errorTips ?: '空数据'
+                'msg' => $errorTips ?: '空数据',
             ];
         } else {
             $res = [
                 'code' => 1,
-                'data' => $data
+                'data' => $data,
             ];
         }
         throw new HttpResponseException(json($res));
@@ -100,8 +99,8 @@ class Generate extends Controller
                     $res[$k]['curd'] = []; //操作
                     $res[$k]['business'] = ''; //业务类型
                     $res[$k]['search'] = false; //检索
-                    $res[$k]['require'] = $v['Null'] == 'NO';//必填
-                    $res[$k]['length'] = preg_replace('/\D/s', '', $v['Type']);//字段长度，不严谨
+                    $res[$k]['require'] = $v['Null'] == 'NO'; //必填
+                    $res[$k]['length'] = preg_replace('/\D/s', '', $v['Type']); //字段长度，不严谨
                 }
             }
             $this->res($res, '数据表中未定义字段，请添加后刷新重试');
@@ -121,7 +120,7 @@ class Generate extends Controller
                 'value' => $val,
                 'label' => $val,
                 'children' => [],
-                'loading' => false
+                'loading' => false,
             ];
             $res[] = $arr;
         }
@@ -166,7 +165,7 @@ class Generate extends Controller
                     $validateRes = $this->createAppValidate($data, $controllerName, $pk);
                     $responseMessage .= ($validateRes === true ? "验证器生成成功，请根据业务逻辑进行配置\n" : "$validateRes\n") . '</br>';
                     $documentRes = $this->createDocument($data, $controllerName, $showName, $tableName);
-                    $responseMessage .= '文档生成结果：' . $documentRes . "</br>";
+                    $responseMessage .= '文档生成结果：' . $documentRes . '</br>';
                 }
             } elseif ($data['selectVal'] == '后台') {
                 //后台
@@ -210,7 +209,7 @@ class Generate extends Controller
      */
     private function createAppController($data, $controllerName, $modelName)
     {
-        $controllerPath = APP_PATH . "app/controller/";
+        $controllerPath = APP_PATH . 'app/controller/';
         if (file_exists($controllerPath . "{$controllerName}.php")) {
             return '控制器已存在';
         }
@@ -305,7 +304,6 @@ CODE;
             return;
         }
         mkdir($path, 0777, true);
-        return;
     }
 
     /**
@@ -362,7 +360,7 @@ class {$controllerName} extends Validate
     ];
 }
 CODE;
-        $this->createPath(APP_PATH . "app/validate/");
+        $this->createPath(APP_PATH . 'app/validate/');
         file_put_contents($validatePath, $code);
         return true;
     }
@@ -387,16 +385,16 @@ CODE;
 
         $index = [
             'type' => 'object',
-            'description' => ''
+            'description' => '',
         ];
         $detail = [
             'type' => 'object',
-            'description' => ''
+            'description' => '',
         ];
         $postParameters = [];
         $postData = [
             'type' => 'object',
-            'description' => '插入的数据主键'
+            'description' => '插入的数据主键',
         ];
         $putParameters = [];
         $deleteParameters = [];
@@ -412,7 +410,7 @@ CODE;
                 if (in_array('列表', $v['curd'])) {
                     $index['properties'][$v['name']] = [
                         'type' => 'string',
-                        'description' => $v['label']
+                        'description' => $v['label'],
                     ];
                     if (in_array($v['autotype'], ['json', 'array', 'object', 'serialize'])) {
                         $index['properties'][$v['name']]['type'] = 'array';
@@ -423,7 +421,7 @@ CODE;
                 if (in_array('详情', $v['curd'])) {
                     $detail['properties'][$v['name']] = [
                         'type' => 'string',
-                        'description' => $v['label']
+                        'description' => $v['label'],
                     ];
                     if (in_array($v['autotype'], ['json', 'array', 'object', 'serialize'])) {
                         $detail['properties'][$v['name']]['type'] = 'array';
@@ -439,7 +437,7 @@ CODE;
                         'in' => 'formData',
                         'required' => $v['require'],
                         'description' => $v['label'],
-                        'type' => 'string'
+                        'type' => 'string',
                     ];
                     if ((is_array($tablePk) && in_array($v['name'], $tablePk)) || $v['name'] == $tablePk) {
                         $hasPk[$v['name']] = true;
@@ -453,7 +451,7 @@ CODE;
                         'in' => 'formData',
                         'required' => $v['require'],
                         'description' => $v['label'],
-                        'type' => 'string'
+                        'type' => 'string',
                     ];
                 }
             }
@@ -469,8 +467,8 @@ CODE;
                         'in' => 'query',
                         'required' => false,
                         'description' => '页码',
-                        'type' => 'string'
-                    ]
+                        'type' => 'string',
+                    ],
                 ],
                 'responses' => [
                     '200' => [
@@ -481,44 +479,44 @@ CODE;
                             'properties' => [
                                 'code' => [
                                     'type' => 'number',
-                                    'description' => '0--失败 1--成功'
+                                    'description' => '0--失败 1--成功',
                                 ],
                                 'status' => [
                                     'type' => 'string',
-                                    'description' => '状态值'
+                                    'description' => '状态值',
                                 ],
                                 'data' => [
                                     'type' => 'object',
                                     'description' => '',
                                     'properties' => [
-                                        "total" => [
-                                            "type" => "number",
-                                            "description" => "总条数"
+                                        'total' => [
+                                            'type' => 'number',
+                                            'description' => '总条数',
                                         ],
-                                        "per_page" => [
-                                            "type" => "number",
-                                            "description" => "每页条数"
+                                        'per_page' => [
+                                            'type' => 'number',
+                                            'description' => '每页条数',
                                         ],
-                                        "current_page" => [
-                                            "type" => "number",
-                                            "description" => "当前页"
+                                        'current_page' => [
+                                            'type' => 'number',
+                                            'description' => '当前页',
                                         ],
-                                        "last_page" => [
-                                            "type" => "number",
-                                            "description" => "最大页"
+                                        'last_page' => [
+                                            'type' => 'number',
+                                            'description' => '最大页',
                                         ],
                                         'data' => [
                                             'type' => 'array',
-                                            'items' => $index
+                                            'items' => $index,
                                         ],
                                     ],
-                                    "required" => ["total", "per_page", "current_page", "last_page", "data"]
-                                ]
+                                    'required' => ['total', 'per_page', 'current_page', 'last_page', 'data'],
+                                ],
                             ],
-                            "required" => ["code", "status", "data"]
-                        ]
-                    ]
-                ]
+                            'required' => ['code', 'status', 'data'],
+                        ],
+                    ],
+                ],
             ];
             $paths[$detailPath]['get'] = [
                 'tags' => ['临时分类'],
@@ -533,18 +531,18 @@ CODE;
                             'properties' => [
                                 'code' => [
                                     'type' => 'number',
-                                    'description' => '0--失败 1--成功'
+                                    'description' => '0--失败 1--成功',
                                 ],
                                 'status' => [
                                     'type' => 'string',
-                                    'description' => '状态值'
+                                    'description' => '状态值',
                                 ],
-                                'data' => $detail
+                                'data' => $detail,
                             ],
-                            'required' => ['code', 'status', 'data']
-                        ]
-                    ]
-                ]
+                            'required' => ['code', 'status', 'data'],
+                        ],
+                    ],
+                ],
             ];
         }
         if ($allowPost) {
@@ -553,13 +551,13 @@ CODE;
                     foreach ($tablePk as $v) {
                         $postData['properties'][$v] = [
                             'type' => 'string',
-                            'description' => ''
+                            'description' => '',
                         ];
                     }
                 } else {
                     $postData['properties'][$tablePk] = [
                         'type' => 'string',
-                        'description' => ''
+                        'description' => '',
                     ];
                 }
             }
@@ -567,8 +565,8 @@ CODE;
                 'tags' => ['临时分类'],
                 'summary' => '添加' . $showName,
                 'description' => '',
-                "consumes" => [
-                    "multipart/form-data"
+                'consumes' => [
+                    'multipart/form-data',
                 ],
                 'parameters' => $postParameters,
                 'responses' => [
@@ -580,18 +578,18 @@ CODE;
                             'properties' => [
                                 'code' => [
                                     'type' => 'number',
-                                    'description' => '0--失败 1--成功'
+                                    'description' => '0--失败 1--成功',
                                 ],
                                 'status' => [
                                     'type' => 'string',
-                                    'description' => '状态值'
+                                    'description' => '状态值',
                                 ],
-                                'data' => $postData
+                                'data' => $postData,
                             ],
-                            "required" => ["code", "status", 'data']
-                        ]
-                    ]
-                ]
+                            'required' => ['code', 'status', 'data'],
+                        ],
+                    ],
+                ],
             ];
         }
         if ($allowPut) {
@@ -604,7 +602,7 @@ CODE;
                                 'in' => 'formData',
                                 'required' => true,
                                 'description' => '',
-                                'type' => 'string'
+                                'type' => 'string',
                             ];
                         }
                     }
@@ -615,7 +613,7 @@ CODE;
                             'in' => 'formData',
                             'required' => true,
                             'description' => '',
-                            'type' => 'string'
+                            'type' => 'string',
                         ];
                     }
                 }
@@ -624,8 +622,8 @@ CODE;
                 'tags' => ['临时分类'],
                 'summary' => '修改' . $showName,
                 'description' => '',
-                "consumes" => [
-                    "multipart/form-data"
+                'consumes' => [
+                    'multipart/form-data',
                 ],
                 'parameters' => $putParameters,
                 'responses' => [
@@ -637,17 +635,17 @@ CODE;
                             'properties' => [
                                 'code' => [
                                     'type' => 'number',
-                                    'description' => '0--失败 1--成功'
+                                    'description' => '0--失败 1--成功',
                                 ],
                                 'status' => [
                                     'type' => 'string',
-                                    'description' => '状态值'
-                                ]
+                                    'description' => '状态值',
+                                ],
                             ],
-                            "required" => ["code", "status"]
-                        ]
-                    ]
-                ]
+                            'required' => ['code', 'status'],
+                        ],
+                    ],
+                ],
             ];
         }
         if ($allowDelete && !is_null($tablePk)) {
@@ -659,7 +657,7 @@ CODE;
                             'in' => 'query',
                             'required' => true,
                             'description' => '',
-                            'type' => 'string'
+                            'type' => 'string',
                         ];
                     }
                 }
@@ -670,7 +668,7 @@ CODE;
                         'in' => 'query',
                         'required' => true,
                         'description' => '',
-                        'type' => 'string'
+                        'type' => 'string',
                     ];
                 }
             }
@@ -678,8 +676,8 @@ CODE;
                 'tags' => ['临时分类'],
                 'summary' => '删除' . $showName,
                 'description' => '',
-                "consumes" => [
-                    "multipart/form-data"
+                'consumes' => [
+                    'multipart/form-data',
                 ],
                 'parameters' => $deleteParameters,
                 'responses' => [
@@ -691,17 +689,17 @@ CODE;
                             'properties' => [
                                 'code' => [
                                     'type' => 'number',
-                                    'description' => '0--失败 1--成功'
+                                    'description' => '0--失败 1--成功',
                                 ],
                                 'status' => [
                                     'type' => 'string',
-                                    'description' => '状态值'
-                                ]
+                                    'description' => '状态值',
+                                ],
                             ],
-                            "required" => ["code", "status"]
-                        ]
-                    ]
-                ]
+                            'required' => ['code', 'status'],
+                        ],
+                    ],
+                ],
             ];
         }
 
@@ -711,9 +709,9 @@ CODE;
                 [
                     'name' => '临时分类',
                     'description' => '公共分类',
-                ]
+                ],
             ],
-            'paths' => $paths
+            'paths' => $paths,
         ];
 
         try {
@@ -723,20 +721,19 @@ CODE;
                     'json' => json_encode($json),
                     'type' => 'swagger',
                     'merge' => 'normal',
-                    'token' => $this->config['api_token']
+                    'token' => $this->config['api_token'],
                 ],
                 'headers' => [
                     'Content-Type' => 'application/x-www-form-urlencoded',
                 ],
-                'http_errors' => false
+                'http_errors' => false,
             ]);
             $code = $response->getStatusCode();
             if ($code == 200) {
-                $body = json_decode((string)$response->getBody(), true);
+                $body = json_decode((string) $response->getBody(), true);
                 return $body['errmsg'];
-            } else {
-                return '请求出错';
             }
+            return '请求出错';
         } catch (Exception $e) {
             return '请求出错';
         }
@@ -751,7 +748,7 @@ CODE;
      */
     private function createAdminController($data, $controllerName, $modelName)
     {
-        $controllerPath = APP_PATH . "admin/controller/";
+        $controllerPath = APP_PATH . 'admin/controller/';
         if (file_exists($controllerPath . "{$controllerName}.php")) {
             return '控制器已存在';
         }
@@ -880,7 +877,7 @@ CODE;
             if (in_array('查', $v['curd'])) {
                 $tableColumns[] = [
                     'title' => $v['label'],
-                    'key' => $v['name']
+                    'key' => $v['name'],
                 ];
             }
             if ($v['search'] == true) {
@@ -896,7 +893,7 @@ CODE;
             'title' => '操作',
             'slot' => 'action',
             'width' => 150,
-            'align' => 'center'
+            'align' => 'center',
         ];
 
         $templatePath = Config::get('curd.index_template');
@@ -1005,7 +1002,6 @@ CODE;
                         $formField[$v['name']] = '';
                 }
             }
-
         }
 
         $templatePath = Config::get('curd.edit_template');
@@ -1065,7 +1061,7 @@ META;
      */
     private function createModel($data, $modelName)
     {
-        $modelPath = APP_PATH . "common/model/";
+        $modelPath = APP_PATH . 'common/model/';
         if (file_exists($modelPath . "{$modelName}.php")) {
             return '模型已存在';
         }
@@ -1122,7 +1118,7 @@ CODE;
         $model_name = $params['tableName'];
         $data = json_decode($params['data'], true);
         $class_name = "app\common\model\\{$model_name}";
-        $model = new $class_name;
+        $model = new $class_name();
         $path = APP_PATH . "common/model/{$model_name}.php";
         $html = rtrim(file_get_contents($path), '}');
         foreach ($data['pageData'] as $k => $v) {

@@ -162,6 +162,44 @@ protected $cache = true;//是否开启查询缓存
 protected $order = ''; //排序字段
 ```
 
+* 针对默认操作，定义了以下钩子方法（方法所在命名空间：`\Generate\Traits\App\Curd`），如有需要，复制到生成的控制器中进行修改即可。
+
+    * 列表
+    ```
+   indexQuery($sql)      //列表查询的模型实例，如果再列表查询上我们需要其他的操作，可以进行链式操作，如$sql->where(['id' => 1])，必须将$sql返回
+   indexAssign($data)    //列表页查询到的数据，可以在这个方法里追加或修改数据，必须返回数组
+   pageEach($item, $key) //分页查询后数据遍历处理，方便修改分页后的数据
+   ```
+  
+   * 详情
+    ```
+  //用法与列表相同
+   detailsQuery($sql) 
+   detailAssign($data)
+   ```   
+   
+    * 添加
+    ```
+   addData($data)      //要入库的数据数组，如果你需要追加数据，那么在此方法中操作是一个好的选择，如$data['createtime'] = date('Y-m-d H:i:s')，必须返回数组
+   addEnd($pk,$data)   //添加结束后的数据处理，$pk是数据库主键值，复合主键则传入数组，$data是当前接受的参数，是包含追加后的数据集合
+    ```
+    
+    * 修改
+    ```
+    // 用法与添加相同
+    editData($data)
+    editEnd($pk,$data)
+    ```
+    
+   * 删除
+    ```
+    deleteEnd($pk,$data)     数据删除完成后，我们还需要其他操作？那么你可以选择在这个方法里书写你的逻辑，$pk是数据库主键值，复合主键则传入数组，$data是被删除的模型实例
+                             if(!false){//业务逻辑判断
+                                 $this->returnFail('错误信息') // 输出错误提示
+                             }
+                             特别注意：无需书写事务提交方法（Db::commit()）和成功提示
+    ```
+
 #### 模型
 
 当前版本生成的模型，全部位于`\app\common\model`，前后台使用统一的模型类。具体属性含义，请参考模型内注释和ThinkPHP 5.0文档。

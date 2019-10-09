@@ -2,7 +2,6 @@
 
 namespace Generate\Traits\Admin;
 
-
 use Generate\Traits\JsonReturn;
 use think\db\Query;
 use think\Model;
@@ -95,7 +94,6 @@ trait Common
      */
     public function addEnd($pk, $data)
     {
-
     }
 
     /**
@@ -103,11 +101,9 @@ trait Common
      * 通过$this->returnFail($message);将错误信息返回到前端，并且回滚数据
      * @param array|int $pk 编辑数据的主键值，多主键传入数组
      * @param mixed $data 接受的参数，包含追加的
-     * @return void
      */
     public function editEnd($pk, $data)
     {
-
     }
 
     /**
@@ -118,6 +114,5 @@ trait Common
      */
     public function deleteEnd($pk)
     {
-
     }
 }
