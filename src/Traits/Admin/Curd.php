@@ -39,20 +39,20 @@ trait Curd
     public function index(Request $request)
     {
         $special = [];
-        $only_arr = [];
+        $onlyArr = [];
         $where = [];
         foreach ($this->searchField as $k => $v) {
             if (is_array($v)) {
                 $key = key($v);
                 $val = $v[$key];
-                $only_arr[] = $key;
+                $onlyArr[] = $key;
                 $special[$key] = $val;
             } else {
-                $only_arr[] = $v;
+                $onlyArr[] = $v;
             }
         }
         $relationSearch = '';
-        $whereData = $this->search($request->only($only_arr), $special, $relationSearch);
+        $whereData = $this->search($request->only($onlyArr), $special, $relationSearch);
         foreach ($whereData as $k => $v) {
             if ($k != 'pageSize' && $k != 'RelationSearch') {
                 switch ($v['type']) {
@@ -132,9 +132,9 @@ trait Curd
     {
         if ($request->isPost()) {
             $params = $request->only($this->addField);
-            $add_data = $this->addData($params);
+            $addData = $this->addData($params);
             $validate = new Validate($this->add_rule);
-            $result = $validate->check($add_data);
+            $result = $validate->check($addData);
             if (!$result) {//验证不通过
                 $this->returnFail($validate->getError());
             }
@@ -144,10 +144,10 @@ trait Curd
             Db::startTrans();
             try {
                 $model = model($this->modelName);
-                $model->allowField(true)->save($add_data);
+                $model->allowField(true)->save($addData);
                 $pk = $model->getPk();
                 $pkValue = $this->getPkValue($model, $pk);
-                $this->addEnd($pkValue, $add_data);
+                $this->addEnd($pkValue, $addData);
             } catch (HttpResponseException $e) {
                 Db::rollback();
                 throw $e;
@@ -211,20 +211,21 @@ trait Curd
         }
         if ($request->isPost()) {
             $params = $request->only($this->editField);
-            $edit_data = $this->editData($params);
+            $params = array_merge($params, $pkValue);
+            $editData = $this->editData($params);
             $validate = new Validate($this->edit_rule);
-            $result = $validate->check($edit_data);
+            $result = $validate->check($editData);
             if (!$result) {//验证不通过
                 $this->returnFail($validate->getError());
             }
             //验证通过
             Db::startTrans();
             try {
-                $model->allowField(true)->save($edit_data, $pkValue);
+                $model->allowField(true)->save($editData, $pkValue);
                 if (is_string($pk)) {
                     $pkValue = $pkValue[$pk];
                 }
-                $this->editEnd($pkValue, $edit_data);
+                $this->editEnd($pkValue, $editData);
             } catch (HttpResponseException $e) {
                 Db::rollback();
                 throw $e;
