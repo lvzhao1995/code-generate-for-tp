@@ -3,12 +3,12 @@
 namespace Generate\Controller;
 
 use Exception;
+use Generate\Traits\JsonReturn;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use think\Controller;
 use think\Db;
 use think\exception\HttpException;
-use think\exception\HttpResponseException;
 use think\facade\Config;
 use think\facade\Env;
 use think\Loader;
@@ -16,6 +16,7 @@ use think\Request;
 
 class Generate extends Controller
 {
+    use JsonReturn;
     protected $config = [];
 
     public function _initialize()
@@ -24,7 +25,6 @@ class Generate extends Controller
         if (!Config::get('app_debug')) {
             throw new HttpException(404, 'module not exists:Generate');
         }
-        Config::set('default_return_type', 'json');
         if (file_exists(Env::get('root_path') . '/env.php')) {
             $this->config = include_once Env::get('root_path') . '/env.php';
         }
@@ -50,28 +50,7 @@ class Generate extends Controller
                 $res[$k]['label'] = str_replace($prefix, '', $v['Tables_in_' . $database]);
             }
         }
-        $this->res($res, '没有数据表，请添加数据表后刷新重试');
-    }
-
-    /**
-     * 统一返回
-     * @param $data
-     * @param string $errorTips
-     */
-    private function res($data, $errorTips = '')
-    {
-        if (!$data || empty($data)) {
-            $res = [
-                'code' => 0,
-                'msg' => $errorTips ?: '空数据',
-            ];
-        } else {
-            $res = [
-                'code' => 1,
-                'data' => $data,
-            ];
-        }
-        throw new HttpResponseException(json($res));
+        $this->returnRes($res, '没有数据表，请添加数据表后刷新重试');
     }
 
     /**
@@ -104,7 +83,7 @@ class Generate extends Controller
                     $res[$k]['length'] = preg_replace('/\D/s', '', $v['Type']); //字段长度，不严谨
                 }
             }
-            $this->res($res, '数据表中未定义字段，请添加后刷新重试');
+            $this->returnRes($res, '数据表中未定义字段，请添加后刷新重试');
         }
     }
 
@@ -125,7 +104,7 @@ class Generate extends Controller
             ];
             $res[] = $arr;
         }
-        $this->res($res, '没有模型');
+        $this->returnRes($res, '没有模型');
     }
 
     /**
@@ -140,7 +119,7 @@ class Generate extends Controller
             $tableName = $request->post('tableName');
             $showName = $request->post('showName', '');
             if (!$tableName || !$data || !$data['selectVal']) {
-                $this->error('参数错误');
+                $this->returnFail('参数错误', 0);
             }
 
             $controllerName = $request->post('controllerName');
@@ -189,7 +168,7 @@ class Generate extends Controller
                     $response['router'] = '<p>{title: \'' . $showName . '\',to: \'/' . $dir . '\'}</p>';
                 }
             } else {
-                $this->error('参数错误');
+                $this->returnFail('参数错误', 0);
             }
             //生成模型
             if (in_array('模型', $data['fruit'])) {
@@ -197,7 +176,7 @@ class Generate extends Controller
                 $responseMessage .= ($modelRes === true ? "模型生成成功\n" : "$modelRes\n") . '</br>';
             }
             $response['message'] = $responseMessage;
-            $this->success($response);
+            $this->returnSuccess($response, 1);
         }
     }
 
@@ -350,7 +329,6 @@ class {$controllerName} extends Validate
     ];
 
     protected \$message = [
-        'id.require'  =>  'id不能为空',
     ];
 
     protected \$scene = [
@@ -1067,10 +1045,10 @@ META;
             return '模型已存在';
         }
         $mainCode = '';
-        $use = "use think\Model;\nuse Generate\Traits\Model\Cache;";
+        $use = "use think\Model;\n";
         $time_status = 'false';
         if (in_array('开启软删', $data['model'])) {
-            $use .= "use traits\model\SoftDelete;\n";
+            $use .= "think\model\concern\SoftDelete;\n";
             $mainCode .= "use SoftDelete;\n";
         }
 
@@ -1094,7 +1072,6 @@ namespace app\common\model;
 
 class {$modelName} extends Model
 {
-    use Cache; //处理缓存，请勿修改或删除。
     {$mainCode}
     // 自动维护时间戳
     protected \$autoWriteTimestamp = {$time_status};
@@ -1158,6 +1135,6 @@ CODE;
 }
 CODE;
         file_put_contents($path, $html);
-        $this->success();
+        $this->returnSuccess([], 1);
     }
 }

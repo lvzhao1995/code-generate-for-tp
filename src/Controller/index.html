@@ -31,7 +31,7 @@
     <i-layout>
         <i-header class="header">
             <h3>
-                {{titleStatus == 1 ? `桥通天下Qframe框架代码生成工具（${create.selectVal}）`: '桥通天下Qframe框架关联关系生成'}}
+                {{titleStatus == 1 ? `代码生成工具（${create.selectVal}）`: '框架关联关系生成'}}
                 <Dropdown @on-click="dropdownClick">
                     <a href="javascript:void(0)">
                         功能切换
@@ -459,16 +459,12 @@
                     res => {
                         this.$Notice.open({
                             title: '操作完成',
-                            desc: res.data.msg.message
+                            desc: res.data.data.message
                         });
-                        if (typeof res.data.msg.router === 'string') {
-                            this.routerTips = res.data.msg.router;
+                        if (typeof res.data.data.router === 'string') {
+                            this.routerTips = res.data.data.router;
                             this.showRouterTips = true;
                         }
-                        // this.$Message.info({
-                        //     content: res.data.msg,
-                        //     duration: 10,
-                        // });
                     }
                 );
             },
