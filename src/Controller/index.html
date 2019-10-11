@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>桥通天下Qframe框架代码生成工具</title>
+    <title>代码生成工具</title>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
     <link rel="stylesheet" href="//unpkg.com/iview/dist/styles/iview.css">
     <script src="https://unpkg.com/iview@3.4.2/dist/iview.min.js"></script>
@@ -31,7 +31,7 @@
     <i-layout>
         <i-header class="header">
             <h3>
-                {{titleStatus == 1 ? `桥通天下Qframe框架代码生成工具（${create.selectVal}）`: '桥通天下Qframe框架关联关系生成'}}
+                {{titleStatus == 1 ? `代码生成工具（${create.selectVal}）`: '关联关系生成'}}
                 <Dropdown @on-click="dropdownClick">
                     <a href="javascript:void(0)">
                         功能切换
@@ -193,7 +193,6 @@
                       @click.native="generateRelation">生成关联关系
             </i-button>
         </i-content>
-        <i-footer class="footer">桥通天下©2018-2019</i-footer>
     </i-layout>
 </div>
 </body>
