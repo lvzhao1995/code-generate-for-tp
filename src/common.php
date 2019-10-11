@@ -37,6 +37,6 @@ $callback = function (Query $query) {
     $modelName = Loader::parseName($name, 1);
     Cache::clear($modelName . '_cache_data');
 };
-Db::event('after_insert', $callback);
-Db::event('after_update', $callback);
-Db::event('after_delete', $callback);
+Query::event('after_insert', $callback);
+Query::event('after_update', $callback);
+Query::event('after_delete', $callback);

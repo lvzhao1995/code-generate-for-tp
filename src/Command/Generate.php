@@ -17,7 +17,7 @@ class Generate extends Command
     protected function execute(Input $input, Output $output)
     {
         //询问是否需要其他功能
-        if (function_exists('system')) {
+        /*if (function_exists('system')) {
             $needPay = $output->confirm($input, 'Do you need payment in your project?', false);
             if ($needPay) {
                 system('composer require hxc/qt-pay');
@@ -42,7 +42,7 @@ class Generate extends Command
             $output->writeln('payment：composer require hxc/qt-pay');
             $output->writeln('sms：composer require hxc/qt-sms');
             $output->writeln('queue：composer require topthink/think-queue:~1.0');
-        }
+        }*/
         $doc = '这是代码生成器所需文件。';
 
         file_put_contents(Env::get('root_path') . 'generate.lock', $doc);
