@@ -1066,7 +1066,7 @@ META;
             return '模型已存在';
         }
         $mainCode = '';
-        $use = "use think\Model;\nuse Generate\Traits\Model\Cache;";
+        $use = "use think\Model;\n";
         $time_status = 'false';
         if (in_array('开启软删', $data['model'])) {
             $use .= "use traits\model\SoftDelete;\n";
@@ -1093,7 +1093,6 @@ namespace app\common\model;
 
 class {$modelName} extends Model
 {
-    use Cache; //处理缓存，请勿修改或删除。
     {$mainCode}
     // 自动维护时间戳
     protected \$autoWriteTimestamp = {$time_status};
