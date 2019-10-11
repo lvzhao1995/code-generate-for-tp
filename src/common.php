@@ -35,7 +35,6 @@ $callback = function (Query $query) {
     $prefix = Config::get('database.prefix');
     $name = preg_replace('/^' . $prefix . '/', '', $table);
     $modelName = Loader::parseName($name, 1);
-    echo $modelName, '已清除缓存', "\n";
     Cache::clear($modelName . '_cache_data');
 };
 Db::event('after_insert', $callback);
