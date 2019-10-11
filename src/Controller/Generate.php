@@ -50,7 +50,7 @@ class Generate extends Controller
                 $res[$k]['label'] = str_replace($prefix, '', $v['Tables_in_' . $database]);
             }
         }
-        $this->returnRes($res, '没有数据表，请添加数据表后刷新重试');
+        $this->returnRes($res, '没有数据表，请添加数据表后刷新重试', $res);
     }
 
     /**
@@ -83,7 +83,7 @@ class Generate extends Controller
                     $res[$k]['length'] = preg_replace('/\D/s', '', $v['Type']); //字段长度，不严谨
                 }
             }
-            $this->returnRes($res, '数据表中未定义字段，请添加后刷新重试');
+            $this->returnRes($res, '数据表中未定义字段，请添加后刷新重试', $res);
         }
     }
 
@@ -104,7 +104,7 @@ class Generate extends Controller
             ];
             $res[] = $arr;
         }
-        $this->returnRes($res, '没有模型');
+        $this->returnRes($res, '没有模型', $res);
     }
 
     /**
@@ -709,7 +709,7 @@ CODE;
             ]);
             $code = $response->getStatusCode();
             if ($code == 200) {
-                $body = json_decode((string) $response->getBody(), true);
+                $body = json_decode((string)$response->getBody(), true);
                 return $body['errmsg'];
             }
             return '请求出错';

@@ -76,12 +76,13 @@ trait Curd
         } else {
             $model = model($this->modelName);
         }
+        $sql = $model->field($this->indexField);
         if ($this->cache) {
-            $model->cache(true, 0, $this->modelName . '_cache_data');
+            $sql->cache(true, 0, $this->modelName . '_cache_data');
         }
-        $model->field($this->indexField)->where($where);
+        $sql->where($where);
 
-        $list = $this->indexQuery($model)->order($this->orderField)->paginate($pageSize)->each(function ($item, $key) {
+        $list = $this->indexQuery($sql)->order($this->orderField)->paginate($pageSize)->each(function ($item, $key) {
             return $this->pageEach($item, $key);
         });
         $this->returnSuccess($list);
