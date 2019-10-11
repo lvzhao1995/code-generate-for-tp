@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Generate\Traits;
 
 use think\Config;
@@ -13,7 +12,7 @@ trait JsonReturn
      * @param $flag
      * @param $failMessage
      * @param array $res
-     * @param null|integer $code
+     * @param int|null $code
      */
     public function returnRes($flag, $failMessage, $res = [], $code = null)
     {
@@ -26,7 +25,7 @@ trait JsonReturn
 
     /**
      * @param array $res
-     * @param null|integer $code
+     * @param int|null $code
      */
     public function returnSuccess($res = [], $code = null)
     {
@@ -44,7 +43,7 @@ trait JsonReturn
 
     /**
      * @param string $failMessage
-     * @param null|integer $code
+     * @param int|null $code
      */
     public function returnFail($failMessage = '操作失败', $code = null)
     {
@@ -54,7 +53,7 @@ trait JsonReturn
         $data = [
             'code' => $code,
             'status' => 'fail',
-            'msg' => $failMessage
+            'msg' => $failMessage,
         ];
         throw new HttpResponseException(\json($data));
     }

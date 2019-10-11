@@ -17,19 +17,19 @@ class Generate extends Command
     {
         //询问是否需要其他功能
         if (function_exists('system')) {
-            $needPay = $output->confirm($input, "Do you need payment in your project?", false);
+            $needPay = $output->confirm($input, 'Do you need payment in your project?', false);
             if ($needPay) {
                 system('composer require hxc/qt-pay');
                 $output->writeln('---------------------------------------');
                 $output->writeln('Payment function has been introduced, please check the documentation for detailed usage.');
             }
-            $needSms = $output->confirm($input, "Do you need SMS in your project?", false);
+            $needSms = $output->confirm($input, 'Do you need SMS in your project?', false);
             if ($needSms) {
                 system('composer require hxc/qt-sms');
                 $output->writeln('---------------------------------------');
                 $output->writeln('SMS has been introduced, please see the documentation for detailed usage.');
             }
-            $needQueue = $output->confirm($input, "Do you need the queue in your project?", false);
+            $needQueue = $output->confirm($input, 'Do you need the queue in your project?', false);
             if ($needQueue) {
                 system('composer require topthink/think-queue:~1.0');
                 $output->writeln('---------------------------------------');
@@ -60,7 +60,7 @@ class Generate extends Command
             copy(__DIR__ . '/../config.php', $targetPath . 'curd.php');
         }
         if (!file_exists(ROOT_PATH . '/env.php')) {
-            file_put_contents(ROOT_PATH.'/env.php',"<?php\nreturn [\n    'view_root' => '',\n    'api_token' => '',\n    'api_uri' => ''\n];");
+            file_put_contents(ROOT_PATH . '/env.php', "<?php\nreturn [\n    'view_root' => '',\n    'api_token' => '',\n    'api_uri' => ''\n];");
         }
     }
 }

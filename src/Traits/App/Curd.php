@@ -8,7 +8,6 @@ use think\response\Json;
 
 /**
  * Trait Curd
- * @package Generate\Traits\App
  * @property string $model
  * @property string $with
  * @property string $cache
@@ -31,7 +30,7 @@ trait Curd
      */
     public function index(Request $request)
     {
-        /**
+        /*
          * 遵循RESTful API
          * get 查
          * post 增

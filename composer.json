@@ -1,6 +1,6 @@
 {
     "name": "lvzhao1995/code-generate",
-    "description": "TP5.0生成工具的CURD",
+    "description": "适用于ThinkPHP的代码生成工具",
     "license": "MIT",
     "authors": [
         {
@@ -23,5 +23,24 @@
         "files": [
             "src/common.php"
         ]
+    },
+    "require-dev": {
+        "brainmaestro/composer-git-hooks": "^2.8",
+        "friendsofphp/php-cs-fixer": "^2.15"
+    },
+    "scripts": {
+        "post-install-cmd": "cghooks add --ignore-lock",
+        "post-update-cmd": "cghooks update",
+        "phpcs-fix": "php-cs-fixer fix",
+        "phpcs-dry": "php-cs-fixer fix --dry-run"
+    },
+    "extra": {
+        "hooks": {
+            "pre-commit": [
+                "composer phpcs-fix",
+                "git add $(git diff --cached --name-only --diff-filter=ACM -- '*.php')"
+            ],
+            "post-merge": "composer update"
+        }
     }
 }

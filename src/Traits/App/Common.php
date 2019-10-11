@@ -20,7 +20,7 @@ trait Common
         $data = [
             'code' => -1,
             'status' => 'fail',
-            'msg' => '没有登录'
+            'msg' => '没有登录',
         ];
         return json($data);
     }

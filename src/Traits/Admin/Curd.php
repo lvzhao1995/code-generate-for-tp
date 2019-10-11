@@ -2,7 +2,6 @@
 
 namespace Generate\Traits\Admin;
 
-
 use think\Db;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
@@ -32,7 +31,6 @@ use think\Validate;
  */
 trait Curd
 {
-
     /**
      * 列表页
      * @param Request $request
@@ -119,7 +117,7 @@ trait Curd
                 $whereData[$k] = [
                     'val' => $v,
                     'field' => $field,
-                    'type' => $type
+                    'type' => $type,
                 ];
             }
         }
