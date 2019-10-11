@@ -44,7 +44,7 @@ $ php think generate
 
 ### 配置文件
 
-* 开启生成工具时会在`APP_PATH/extra/curd.php`生成配置文件，详情查看文件中的注释。如果此文件存在则不会覆盖，请自行检查内容是否完整。
+* 开启生成工具时会在`APP_PATH/extra/curd.php`生成配置文件，详情查看文件中的注释。如果此文件存在则不会覆盖，请自行检查内容是否完整。如果不使用iview可通过更改配置自定义模板。
 
 * 项目根目录下会生成`env.php`文件，此文件不会向git中提交，存储本地配置，详细说明如下：
 1. `view_root`生成vue文件的存放目录，使用绝对路径。
@@ -242,10 +242,6 @@ public function returnSuccess($res = [], $code = null)
  */
 public function returnFail($failMessage = '操作失败', $code = null)
 ```
-
-## 配置文件
-
-本工具配置文件位于`application/extra/curd.php`，详细说明请参考文件内注释，如果不使用iview-admin可通过更改配置更换模板。
 
 ## 项目上线
 
