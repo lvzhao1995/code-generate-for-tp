@@ -1,6 +1,6 @@
 {
     "name": "lvzhao1995/code-generate",
-    "description": "TP5.0生成工具的CURD",
+    "description": "适用于ThinkPHP的代码生成工具",
     "license": "MIT",
     "authors": [
         {
