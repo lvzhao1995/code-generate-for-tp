@@ -2,8 +2,9 @@
 
 namespace Generate\Traits;
 
-use think\Config;
+use function json;
 use think\exception\HttpResponseException;
+use think\facade\Config;
 
 trait JsonReturn
 {
@@ -38,7 +39,7 @@ trait JsonReturn
             'data' => $res,
         ];
         $data['data'] = $res;
-        throw new HttpResponseException(\json($data));
+        throw new HttpResponseException(json($data));
     }
 
     /**
@@ -55,6 +56,6 @@ trait JsonReturn
             'status' => 'fail',
             'msg' => $failMessage,
         ];
-        throw new HttpResponseException(\json($data));
+        throw new HttpResponseException(json($data));
     }
 }

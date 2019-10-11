@@ -2,10 +2,8 @@
 
 namespace Generate\Traits\Admin;
 
+use Exception;
 use think\Db;
-use think\db\exception\DataNotFoundException;
-use think\db\exception\ModelNotFoundException;
-use think\Exception;
 use think\exception\DbException;
 use think\exception\HttpResponseException;
 use think\Model;
@@ -151,7 +149,7 @@ trait Curd
             } catch (HttpResponseException $e) {
                 Db::rollback();
                 throw $e;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Db::rollback();
                 $this->returnFail($e->getMessage());
             }
@@ -189,10 +187,6 @@ trait Curd
     /**
      * 编辑数据页
      * @param Request $request
-     * @throws Exception
-     * @throws DataNotFoundException
-     * @throws ModelNotFoundException
-     * @throws DbException
      */
     public function edit(Request $request)
     {
@@ -229,7 +223,7 @@ trait Curd
             } catch (HttpResponseException $e) {
                 Db::rollback();
                 throw $e;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Db::rollback();
                 $this->returnFail($e->getMessage());
             }
@@ -248,7 +242,6 @@ trait Curd
     /**
      * 删除
      * @param Request $request
-     * @throws Exception
      */
     public function delete(Request $request)
     {
@@ -279,7 +272,7 @@ trait Curd
         } catch (HttpResponseException $e) {
             Db::rollback();
             throw $e;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Db::rollback();
             $this->returnFail($e->getMessage());
         }

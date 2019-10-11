@@ -13,7 +13,7 @@
         "php": ">=5.6.0",
         "ext-json": "*",
         "ext-mbstring": "*",
-        "topthink/framework": "5.0.*",
+        "topthink/framework": "5.1.*",
         "guzzlehttp/guzzle": "^6.3"
     },
     "autoload": {

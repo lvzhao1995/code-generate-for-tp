@@ -5,6 +5,7 @@ namespace Generate\Command;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
+use think\facade\Env;
 
 class Generate extends Command
 {
@@ -31,7 +32,7 @@ class Generate extends Command
             }
             $needQueue = $output->confirm($input, 'Do you need the queue in your project?', false);
             if ($needQueue) {
-                system('composer require topthink/think-queue:~1.0');
+                system('composer require topthink/think-queue:~2.0');
                 $output->writeln('---------------------------------------');
                 $output->writeln('Queue function has been introduced, please see the documentation for detailed usage.');
             }
@@ -44,10 +45,10 @@ class Generate extends Command
         }
         $doc = '这是代码生成器所需文件。';
 
-        file_put_contents(ROOT_PATH . 'generate.lock', $doc);
+        file_put_contents(Env::get('root_path') . 'generate.lock', $doc);
         $output->writeln('---------------------------------------');
         $output->writeln('Code generation tool url：/generate');
-        $targetPath = APP_PATH . 'extra/';
+        $targetPath = Env::get('root_path') . 'config/';
         if (!file_exists($targetPath)) {
             mkdir($targetPath, 0777, true);
         }
@@ -59,8 +60,8 @@ class Generate extends Command
         } else {
             copy(__DIR__ . '/../config.php', $targetPath . 'curd.php');
         }
-        if (!file_exists(ROOT_PATH . '/env.php')) {
-            file_put_contents(ROOT_PATH . '/env.php', "<?php\nreturn [\n    'view_root' => '',\n    'api_token' => '',\n    'api_uri' => ''\n];");
+        if (!file_exists(Env::get('root_path') . '/env.php')) {
+            file_put_contents(Env::get('root_path') . '/env.php', "<?php\nreturn [\n    'view_root' => '',\n    'api_token' => '',\n    'api_uri' => ''\n];");
         }
     }
 }

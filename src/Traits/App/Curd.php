@@ -317,7 +317,6 @@ trait Curd
      * 删
      * @param Request $request
      * @return Json|void
-     * @throws DbException
      */
     protected function delete(Request $request)
     {

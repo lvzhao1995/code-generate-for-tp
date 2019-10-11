@@ -5,11 +5,12 @@ namespace Generate\Controller;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use think\Config;
 use think\Controller;
 use think\Db;
 use think\exception\HttpException;
 use think\exception\HttpResponseException;
+use think\facade\Config;
+use think\facade\Env;
 use think\Loader;
 use think\Request;
 
@@ -24,8 +25,8 @@ class Generate extends Controller
             throw new HttpException(404, 'module not exists:Generate');
         }
         Config::set('default_return_type', 'json');
-        if (file_exists(ROOT_PATH . '/env.php')) {
-            $this->config = include_once ROOT_PATH . '/env.php';
+        if (file_exists(Env::get('root_path') . '/env.php')) {
+            $this->config = include_once Env::get('root_path') . '/env.php';
         }
     }
 
@@ -112,7 +113,7 @@ class Generate extends Controller
      */
     public function getModelData()
     {
-        $model_path = ROOT_PATH . 'application' . DIRECTORY_SEPARATOR . 'common' . DIRECTORY_SEPARATOR . 'model' . DIRECTORY_SEPARATOR . '*.php';
+        $model_path = Env::get('root_path') . 'application' . DIRECTORY_SEPARATOR . 'common' . DIRECTORY_SEPARATOR . 'model' . DIRECTORY_SEPARATOR . '*.php';
         $res = [];
         foreach (glob($model_path) as $k => $v) {
             $val = explode('.php', explode(DIRECTORY_SEPARATOR . 'model' . DIRECTORY_SEPARATOR, $v)[1])[0];
@@ -209,7 +210,7 @@ class Generate extends Controller
      */
     private function createAppController($data, $controllerName, $modelName)
     {
-        $controllerPath = APP_PATH . 'app/controller/';
+        $controllerPath = Env::get('app_path') . 'app/controller/';
         if (file_exists($controllerPath . "{$controllerName}.php")) {
             return '控制器已存在';
         }
@@ -315,7 +316,7 @@ CODE;
      */
     private function createAppValidate($data, $controllerName, $pk)
     {
-        $validatePath = APP_PATH . "app/validate/{$controllerName}.php";
+        $validatePath = Env::get('app_path') . "app/validate/{$controllerName}.php";
         if (file_exists($validatePath)) {
             return '验证器已存在';
         }
@@ -360,7 +361,7 @@ class {$controllerName} extends Validate
     ];
 }
 CODE;
-        $this->createPath(APP_PATH . 'app/validate/');
+        $this->createPath(Env::get('app_path') . 'app/validate/');
         file_put_contents($validatePath, $code);
         return true;
     }
@@ -748,7 +749,7 @@ CODE;
      */
     private function createAdminController($data, $controllerName, $modelName)
     {
-        $controllerPath = APP_PATH . 'admin/controller/';
+        $controllerPath = Env::get('app_path') . 'admin/controller/';
         if (file_exists($controllerPath . "{$controllerName}.php")) {
             return '控制器已存在';
         }
@@ -1061,7 +1062,7 @@ META;
      */
     private function createModel($data, $modelName)
     {
-        $modelPath = APP_PATH . 'common/model/';
+        $modelPath = Env::get('app_path') . 'common/model/';
         if (file_exists($modelPath . "{$modelName}.php")) {
             return '模型已存在';
         }
@@ -1119,7 +1120,7 @@ CODE;
         $data = json_decode($params['data'], true);
         $class_name = "app\common\model\\{$model_name}";
         $model = new $class_name();
-        $path = APP_PATH . "common/model/{$model_name}.php";
+        $path = Env::get('app_path') . "common/model/{$model_name}.php";
         $html = rtrim(file_get_contents($path), '}');
         foreach ($data['pageData'] as $k => $v) {
             if (is_array($v['business']) && !empty($v['business'])) {
