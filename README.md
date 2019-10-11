@@ -205,6 +205,10 @@ public function returnSuccess($res = [], $code = null)
 public function returnFail($failMessage = '操作失败', $code = null)
 ```
 
+## 配置文件
+
+本工具配置文件位于`application/extra/curd.php`，详细说明请参考文件内注释，如果不使用iview可通过更改配置更换模板。
+
 ## 项目上线
 
 * 务必将根目录下的generate.lock文件删除
