@@ -1,4 +1,4 @@
-# 代码生成工具（适用于Vue）
+# 代码生成工具
 
 代码生成工具主要用于生成后端开发中简单的增删改查代码，复杂的逻辑还需自己实现，不过你无须担心，我们通过简单的封装简化了开发流程，即便你是新手，也可以写出出色的代码。
 
@@ -242,6 +242,10 @@ public function returnSuccess($res = [], $code = null)
  */
 public function returnFail($failMessage = '操作失败', $code = null)
 ```
+
+## 配置文件
+
+本工具配置文件位于`application/extra/curd.php`，详细说明请参考文件内注释，如果不使用iview-admin可通过更改配置更换模板。
 
 ## 项目上线
 
