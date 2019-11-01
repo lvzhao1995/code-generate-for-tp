@@ -10,19 +10,16 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "php": ">=5.6.0",
+        "php": ">=7.1.0",
         "ext-json": "*",
         "ext-mbstring": "*",
-        "topthink/framework": "5.1.*",
+        "topthink/framework": "6.0.*",
         "guzzlehttp/guzzle": "^6.3"
     },
     "autoload": {
         "psr-4": {
             "Generate\\": "src/"
-        },
-        "files": [
-            "src/common.php"
-        ]
+        }
     },
     "require-dev": {
         "brainmaestro/composer-git-hooks": "^2.8",
@@ -41,6 +38,11 @@
                 "git add $(git diff --cached --name-only --diff-filter=ACM -- '*.php')"
             ],
             "post-merge": "composer update"
+        },
+        "think": {
+            "services": [
+                "Generate\\Service"
+            ]
         }
     }
 }

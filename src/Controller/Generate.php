@@ -6,33 +6,27 @@ use Exception;
 use Generate\Traits\JsonReturn;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use think\Controller;
-use think\Db;
 use think\exception\HttpException;
 use think\facade\Config;
+use think\facade\Db;
 use think\facade\Env;
-use think\Loader;
 use think\Request;
 
-class Generate extends Controller
+class Generate
 {
     use JsonReturn;
     protected $config = [];
 
-    public function _initialize()
+    public function __construct()
     {
-        parent::_initialize();
-        if (!Config::get('app_debug')) {
+        if (!Env::get('app_debug', false)) {
             throw new HttpException(404, 'module not exists:Generate');
-        }
-        if (file_exists(Env::get('root_path') . '/env.php')) {
-            $this->config = include_once Env::get('root_path') . '/env.php';
         }
     }
 
     public function index()
     {
-        return view(__DIR__ . '/index.html');
+        return view(__DIR__ . DIRECTORY_SEPARATOR . 'index.html');
     }
 
     /**
@@ -62,11 +56,7 @@ class Generate extends Controller
     {
         if ($request->isPost()) {
             $table = $request->param('table');
-            $is_model = $request->param('isModel');
-            if ($is_model) {
-                $model = model("app\common\model\\$table");
-                $table = $model->getTable();
-            }
+            $table = parse_name($table, 0);
             $prefix = Config::get('database.prefix');
             $res = [];
             $data = Db::query("SHOW FULL COLUMNS FROM `{$prefix}{$table}`");
@@ -89,13 +79,22 @@ class Generate extends Controller
 
     /**
      * 获取模型
+     * @param string $appName
      */
-    public function getModelData()
+    public function getModelData(string $appName = '')
     {
-        $model_path = Env::get('root_path') . 'application' . DIRECTORY_SEPARATOR . 'common' . DIRECTORY_SEPARATOR . 'model' . DIRECTORY_SEPARATOR . '*.php';
+        $model_path = Config::get('model_path');
+        if (empty($model_path)) {
+            if ($this->isMultiApp()) {
+                $model_path = base_path() . 'common' . DIRECTORY_SEPARATOR . 'model';
+            } else {
+                $model_path = base_path() . 'model';
+            }
+        }
+        $model_path = str_replace('{{app_name}}', $appName, $model_path) . DIRECTORY_SEPARATOR . '*.php';
         $res = [];
         foreach (glob($model_path) as $k => $v) {
-            $val = explode('.php', explode(DIRECTORY_SEPARATOR . 'model' . DIRECTORY_SEPARATOR, $v)[1])[0];
+            $val = basename($v);
             $arr = [
                 'value' => $val,
                 'label' => $val,
@@ -105,6 +104,15 @@ class Generate extends Controller
             $res[] = $arr;
         }
         $this->returnRes($res, '没有模型', $res);
+    }
+
+    /**
+     * 判断是否多应用，以app/controller是否存在为准
+     * @return bool
+     */
+    private function isMultiApp(): bool
+    {
+        return !file_exists(base_path() . 'controller');
     }
 
     /**
@@ -126,8 +134,8 @@ class Generate extends Controller
             if (empty($controllerName)) {
                 $controllerName = $tableName;
             }
-            $controllerName = Loader::parseName($controllerName, 1);
-            $modelName = Loader::parseName($tableName, 1);
+            $controllerName = parse_name($controllerName, 1);
+            $modelName = parse_name($tableName, 1);
 
             $responseMessage = '';
 
@@ -163,7 +171,7 @@ class Generate extends Controller
                     $responseMessage .= ($addRes === true ? "add视图生成成功\n" : "$addRes\n") . '</br>';
                     $editRes = $this->createEditView($data, $controllerName);
                     $responseMessage .= ($editRes === true ? "edit视图生成成功\n" : "$editRes\n") . '</br>';
-                    $dir = Loader::parseName($controllerName);
+                    $dir = parse_name($controllerName);
                     $this->createMeta($showName, $dir);
                     $response['router'] = '<p>{title: \'' . $showName . '\',to: \'/' . $dir . '\'}</p>';
                 }
@@ -357,7 +365,7 @@ CODE;
         if (empty($this->config['api_token']) || empty($this->config['api_uri'])) {
             return '请先完善配置';
         }
-        $path = '/app/' . Loader::parseName($controllerName) . '/index';
+        $path = '/app/' . parse_name($controllerName) . '/index';
         $detailPath = $path . '?id={id}';
 
         $paths = [];
@@ -709,7 +717,7 @@ CODE;
             ]);
             $code = $response->getStatusCode();
             if ($code == 200) {
-                $body = json_decode((string)$response->getBody(), true);
+                $body = json_decode((string) $response->getBody(), true);
                 return $body['errmsg'];
             }
             return '请求出错';
@@ -837,7 +845,7 @@ CODE;
      */
     private function createIndexView($data, $controllerName)
     {
-        $viewDirName = Loader::parseName($controllerName);
+        $viewDirName = parse_name($controllerName);
         if (!empty($this->config['view_root'])) {
             $viewDir = $this->config['view_root'] . "/{$viewDirName}/";
             $viewPath = $viewDir . 'index.vue';
@@ -899,7 +907,7 @@ CODE;
      */
     private function createAddView($data, $controllerName)
     {
-        $viewDirName = Loader::parseName($controllerName);
+        $viewDirName = parse_name($controllerName);
         if (!empty($this->config['view_root'])) {
             $viewDir = $this->config['view_root'] . "/{$viewDirName}/";
             $viewPath = $viewDir . 'add.vue';
@@ -952,7 +960,7 @@ CODE;
      */
     private function createEditView($data, $controllerName)
     {
-        $viewDirName = Loader::parseName($controllerName);
+        $viewDirName = parse_name($controllerName);
         if (!empty($this->config['view_root'])) {
             $viewDir = $this->config['view_root'] . "/{$viewDirName}/";
             $viewPath = $viewDir . 'edit.vue';

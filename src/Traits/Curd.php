@@ -1,33 +1,39 @@
 <?php
 
-namespace Generate\Traits\App;
+namespace Generate\Traits;
 
 use Exception;
-use think\Db;
+use think\db\exception\DbException;
 use think\db\Query;
-use think\exception\DbException;
 use think\exception\HttpResponseException;
+use think\exception\ValidateException;
+use think\facade\Db;
 use think\Model;
 use think\Request;
 use think\response\Json;
+use think\Validate;
 
 /**
- * Trait Curd
+ * Trait curd
+ * @property $countField
  * @property string $model
- * @property string $with
- * @property string $cache
- * @property string $order
- * @property array $allow
+ * @property array $searchField
+ * @property int $pageLimit
+ * @property bool $cache
  * @property array $indexField
  * @property array $detailField
  * @property array $addField
  * @property array $editField
- * @property int|null $limit
- * @method array|string|true validate($data, $validate, $message = [], $batch = false, $callback = null)
- * @mixin Common
+ * @property array $deleteField
+ * @property string $validate
+ * @property array $allow
+ * @property string $with
+ * @property string $order
  */
 trait Curd
 {
+    use JsonReturn;
+
     /**
      * @param Request $request
      * @return Json|void
@@ -45,40 +51,40 @@ trait Curd
         switch ($request->method()) {
             case 'GET':
                 if (in_array('get', $this->allow)) {
-                    return $this->get($request);
+                    $this->get($request);
                 }
                 break;
             case 'POST':
                 if (in_array('post', $this->allow)) {
-                    return $this->post($request);
+                    $this->post($request);
                 }
                 break;
             case 'PUT':
                 if (in_array('put', $this->allow)) {
-                    return $this->put($request);
+                    $this->put($request);
                 }
                 break;
             case 'DELETE':
                 if (in_array('delete', $this->allow)) {
-                    return $this->delete($request);
+                    $this->delete($request);
                 }
                 break;
         }
     }
 
     /**
-     * 查
+     * 列表和详情
      * @param Request $request
-     * @return Json|void
      * @throws DbException
      */
-    protected function get($request)
+    protected function get(Request $request): void
     {
-        $model = model($this->model);
+        /* @var Model $model */
+        $model = new $this->model;
 
-        $sql = $model->with($this->with)->order($this->order);
+        $sql = $model->with($this->with);
         if ($this->cache) {
-            $sql = $sql->cache(true, 0, $this->model . '_cache_data');
+            $sql = $sql->cache(true, 0, $model->getName() . '_cache_data');
         }
 
         //获取主键值
@@ -103,25 +109,25 @@ trait Curd
             }
             $res = $this->detailAssign($res);
         } else {
-            //列表
-            //获取分页参数
-            $pageSize = $request->param('pageSize');
-            if (empty($pageSize)) {
-                $pageSize = $this->limit;
-            }
-            $res = $this->indexQuery($sql)->field($this->indexField)->paginate($pageSize)
-                ->each(function ($item, $key) {
-                    return $this->pageEach($item, $key);
-                });
-            $res = $this->indexAssign($res);
+
+            $pageSize = $request->param('pageSize') ?: $this->pageLimit;
+
+            /* @var Query $sql */
+            $sql = $sql->field($this->indexField);
+            $sql = $this->search($sql);
+
+            $list = $this->indexQuery($sql)->order($this->order)->paginate($pageSize)->each(function ($item, $key) {
+                return $this->pageEach($item, $key);
+            });
+            $res = $this->indexAssign($list);
         }
         $this->returnSuccess($res);
     }
 
     /**
-     * 详情查询捕获
-     * @param Query|Model $sql 当前查询对象
-     * @return Query|Model
+     * 详情查询sql捕获
+     * @param Query|Model $sql
+     * @return Query
      */
     protected function detailQuery($sql)
     {
@@ -130,7 +136,7 @@ trait Curd
 
     /**
      * 输出到详情的数据捕获
-     * @param $data @desc当前输出到列表视图的数据
+     * @param $data
      * @return mixed
      */
     protected function detailAssign($data)
@@ -139,9 +145,42 @@ trait Curd
     }
 
     /**
+     * 条件查询
+     * @param Query $sql
+     * @return Query
+     */
+    protected function search($sql)
+    {
+        $params = \think\facade\Request::param();
+        foreach ($this->searchField as $key => $value) {
+            if (is_string($key) && isset($params[$key]) && $params[$key] !== '') {
+                if (is_array($value)) {
+                    switch ($value[1]) {
+                        case 'time_start':
+                            $sql->whereTime($value[0], '>=', $params[$key]);
+                            break;
+                        case 'time_end':
+                            $sql->whereTime($value[0], '<=', $params[$key] . ' 23:59:59');
+                            break;
+                        case 'select':
+                        case 'exact':
+                            $sql->where($value[0], $params[$key]);
+                            break;
+                    }
+                } else {
+                    $sql->where($value, 'like', $params[$key]);
+                }
+            } elseif (isset($params[$value]) && $params[$value] !== '') {
+                $sql->where($value, 'like', $params[$value]);
+            }
+        }
+        return $sql;
+    }
+
+    /**
      * 列表查询sql捕获
-     * @param Query|Model $sql 当前查询对象
-     * @return Query|Model
+     * @param Query|Model $sql
+     * @return Query
      */
     protected function indexQuery($sql)
     {
@@ -160,8 +199,8 @@ trait Curd
     }
 
     /**
-     * 输出到列表视图的数据捕获
-     * @param $data @desc当前输出到列表视图的数据
+     * 输出到列表的数据捕获
+     * @param $data
      * @return mixed
      */
     protected function indexAssign($data)
@@ -170,29 +209,32 @@ trait Curd
     }
 
     /**
-     * 增
+     * 新增数据页
      * @param Request $request
-     * @return Json|void
      */
-    protected function post(Request $request)
+    protected function post(Request $request): void
     {
         $params = $request->only($this->addField);
-        $params = $this->addData($params);
-        $params_status = $this->validate($params, "{$this->model}.store");
-        if (true !== $params_status) {
-            // 验证失败 输出错误信息
-            $this->returnFail($params_status);
-        }
+        $addData = $this->addData($params);
         $pk = '';
         $pkValue = '';
-        Db::startTrans();
+
         try {
-            $model = model($this->model);
-            $model->allowField(true)->save($params);
+            //验证数据
+            /* @var Validate $validate */
+            $validate = new $this->validate;
+            $validate->scene('add')->check($addData);
+
+            Db::startTrans();
+            /* @var Model $model */
+            $model = new $this->model;
+            $model->save($addData);
             $pk = $model->getPk();
             $pkValue = $this->getPkValue($model, $pk);
-            $this->addEnd($pkValue, $params);
-            Db::commit();
+            $this->addEnd($pkValue, $addData);
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->returnFail($e->getError());
         } catch (HttpResponseException $e) {
             Db::rollback();
             throw $e;
@@ -200,6 +242,7 @@ trait Curd
             Db::rollback();
             $this->returnFail($e->getMessage());
         }
+        Db::commit();
         if (!is_array($pkValue)) {
             $pkValue = [$pk => $pkValue];
         }
@@ -240,50 +283,52 @@ trait Curd
 
     /**
      * 成功添加数据后的数据捕获
-     * @param mixed $pk 添加后的主键值，多主键传入数组
-     * @param array $data 接受的参数，包含追加的
+     * 通过$this->returnFail($message);将错误信息返回到前端，并且回滚数据
+     * @param int|array $pk 添加后的主键值，多主键传入数组
+     * @param mixed $data 接受的参数，包含追加的
+     * @return mixed|void
      */
     protected function addEnd($pk, $data)
     {
     }
 
     /**
-     * 改
+     * 编辑数据页
      * @param Request $request
-     * @return Json|void
      */
     protected function put(Request $request)
     {
-        $model = model($this->model);
-        //获取主键
+        /* @var Model $model */
+        $model = new $this->model;
         $pk = $model->getPk();
         $pkValue = $request->only($pk);
+
         $pkArr = $pk;
         if (is_string($pkArr)) {
             $pkArr = [$pkArr];
         }
         foreach ($pkArr as $key) {
             if (empty($pkValue[$key])) {
-                //判断主键是否完整
                 $this->returnFail('参数有误，缺少' . $key);
             }
         }
         $params = $request->only($this->editField);
         $params = array_merge($params, $pkValue);
-        $params = $this->editData($params);
-        $params_status = $this->validate($params, "{$this->model}.update");
-        if (true !== $params_status) {
-            // 验证失败 输出错误信息
-            $this->returnFail($params_status);
-        }
-        Db::startTrans();
+        $editData = $this->editData($params);
         try {
-            $model->allowField(true)->save($params, $pkValue);
+            /* @var Validate $validate */
+            $validate = new $this->validate;
+            $validate->scene('edit')->check($editData);
+            Db::startTrans();
+            //验证通过
+            call_user_func([$this->model, 'update'], $editData, $pkValue);
             if (is_string($pk)) {
                 $pkValue = $pkValue[$pk];
             }
-            $this->editEnd($pkValue, $params);
-            Db::commit();
+            $this->editEnd($pkValue, $editData);
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->returnFail($e->getError());
         } catch (HttpResponseException $e) {
             Db::rollback();
             throw $e;
@@ -291,6 +336,7 @@ trait Curd
             Db::rollback();
             $this->returnFail($e->getMessage());
         }
+        Db::commit();
         $this->returnSuccess();
     }
 
@@ -306,52 +352,57 @@ trait Curd
 
     /**
      * 成功编辑数据后的数据捕获
-     * @param mixed $pk 编辑数据的主键值，多主键传入数组
-     * @param array $data 接受的参数，包含追加的
+     * 通过$this->returnFail($message);将错误信息返回到前端，并且回滚数据
+     * @param array|int $pk 编辑数据的主键值，多主键传入数组
+     * @param mixed $data 接受的参数，包含追加的
      */
     protected function editEnd($pk, $data)
     {
     }
 
     /**
-     * 删
+     * 删除
      * @param Request $request
-     * @return Json|void
      */
     protected function delete(Request $request)
     {
-        $model = model($this->model);
-        //获取主键
+        /* @var Model $model */
+        $model = new $this->model;
         $pk = $model->getPk();
         $pkValue = $request->only($pk);
+
         $pkArr = $pk;
         if (is_string($pkArr)) {
             $pkArr = [$pkArr];
         }
         foreach ($pkArr as $key) {
             if (empty($pkValue[$key])) {
-                //判断主键是否完整
                 $this->returnFail('参数有误，缺少' . $key);
             }
         }
 
-        $params = $request->param();
-        $params_status = $this->validate($params, "{$this->model}.delete");
-        if (true !== $params_status) {
-            // 验证失败 输出错误信息
-            $this->returnFail($params_status);
-        }
-        $data = model($this->model)->get($pkValue);
-        if (empty($data)) {
-            $this->returnFail('数据不存在');
-        }
-        Db::startTrans();
+        $params = $request->only($this->deleteField);
+        $params = array_merge($params, $pkValue);
+
         try {
+            /* @var Validate $validate */
+            $validate = new $this->validate;
+            $validate->scene('delete')->check($params);
+
+            Db::startTrans();
+            $data = $model->find($pkValue);
+            if (empty($data)) {
+                $this->returnFail();
+            }
+
             $data->delete();
             if (is_string($pk)) {
                 $pkValue = $pkValue[$pk];
             }
             $this->deleteEnd($pkValue, $data);
+        } catch (ValidateException $e) {
+            Db::rollback();
+            $this->returnFail($e->getError());
         } catch (HttpResponseException $e) {
             Db::rollback();
             throw $e;
@@ -359,13 +410,16 @@ trait Curd
             Db::rollback();
             $this->returnFail($e->getMessage());
         }
+        Db::commit();
         $this->returnSuccess();
     }
 
     /**
      * 成功删除数据后的数据捕获
-     * @param mixed $pk 要删除数据的主键值，多主键传入数组
-     * @param mixed $data 被删除的数据
+     * 通过$this->returnFail($message);将错误信息返回到前端，并且回滚数据
+     * @param int|array $pk 要删除数据的主键值，多主键则传入数组
+     * @param Model|array $data 要删除的数据
+     * @return mixed|void
      */
     protected function deleteEnd($pk, $data)
     {
