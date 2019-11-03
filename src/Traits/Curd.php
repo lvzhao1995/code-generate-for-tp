@@ -80,7 +80,7 @@ trait Curd
     protected function get(Request $request): void
     {
         /* @var Model $model */
-        $model = new $this->model;
+        $model = new $this->model();
 
         $sql = $model->with($this->with);
         if ($this->cache) {
@@ -109,7 +109,6 @@ trait Curd
             }
             $res = $this->detailAssign($res);
         } else {
-
             $pageSize = $request->param('pageSize') ?: $this->pageLimit;
 
             /* @var Query $sql */
@@ -222,12 +221,12 @@ trait Curd
         try {
             //验证数据
             /* @var Validate $validate */
-            $validate = new $this->validate;
+            $validate = new $this->validate();
             $validate->scene('add')->check($addData);
 
             Db::startTrans();
             /* @var Model $model */
-            $model = new $this->model;
+            $model = new $this->model();
             $model->save($addData);
             $pk = $model->getPk();
             $pkValue = $this->getPkValue($model, $pk);
@@ -299,7 +298,7 @@ trait Curd
     protected function put(Request $request)
     {
         /* @var Model $model */
-        $model = new $this->model;
+        $model = new $this->model();
         $pk = $model->getPk();
         $pkValue = $request->only($pk);
 
@@ -317,7 +316,7 @@ trait Curd
         $editData = $this->editData($params);
         try {
             /* @var Validate $validate */
-            $validate = new $this->validate;
+            $validate = new $this->validate();
             $validate->scene('edit')->check($editData);
             Db::startTrans();
             //验证通过
@@ -367,7 +366,7 @@ trait Curd
     protected function delete(Request $request)
     {
         /* @var Model $model */
-        $model = new $this->model;
+        $model = new $this->model();
         $pk = $model->getPk();
         $pkValue = $request->only($pk);
 
@@ -386,7 +385,7 @@ trait Curd
 
         try {
             /* @var Validate $validate */
-            $validate = new $this->validate;
+            $validate = new $this->validate();
             $validate->scene('delete')->check($params);
 
             Db::startTrans();

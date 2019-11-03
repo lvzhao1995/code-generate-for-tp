@@ -20,14 +20,13 @@ return PhpCsFixer\Config::create()
         'single_trait_insert_per_statement' => false,
         'yoda_style' => null,
         'method_chaining_indentation' => true,
-        'array_indentation' => true
+        'array_indentation' => true,
+        'binary_operator_spaces'=>['operators'=>['=>'=>'align_single_space']]
     ))
     ->setIndent('    ')
     ->setLineEnding(PHP_EOL)
     ->setFinder(
         PhpCsFixer\Finder::create()
             ->exclude('vendor')
-            ->exclude('thinkphp')
-            ->exclude('runtime')
             ->in(__DIR__)
     );

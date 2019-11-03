@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <title>ThinkPHP代码生成工具</title>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
-    <link rel="stylesheet" href="//unpkg.com/iview/dist/styles/iview.css">
-    <script src="https://unpkg.com/iview@3.4.2/dist/iview.min.js"></script>
-    <script src="https://unpkg.com/axios@0.19.0/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/view-design@4.0.2/dist/styles/iview.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/view-design@4.0.2/dist/iview.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.19.0/dist/axios.min.js"></script>
     <style>
         .header {
             color: white;
@@ -31,7 +31,7 @@
     <i-layout>
         <i-header class="header">
             <h3>
-                {{titleStatus == 1 ? `代码生成工具（${create.selectVal}）`: '框架关联关系生成'}}
+                {{titleStatus == 1 ? `代码生成工具`: '框架关联关系生成'}}
                 <Dropdown @on-click="dropdownClick">
                     <a href="javascript:void(0)">
                         功能切换
@@ -45,125 +45,122 @@
             </h3>
         </i-header>
         <i-content class="content" v-if="titleStatus==1">
-            <alert closable>* 模型位于application/common/model目录，前后台通用。</alert>
-            <div class="table-wrap">
-                <span>业务选择：</span>
-                <radio-group type="button" v-model="create.selectVal">
-                    <Radio label="前台">前台</Radio>
-                    <Radio label="后台">后台</Radio>
-                </radio-group>
-            </div>
-            <div class="table-wrap">
-                数据表：
-                <i-select style="width:200px" v-model="tableName" @on-change="tableChange" filterable>
-                    <i-option v-for="item in tableData" :value="item.value" :key="item.value">{{ item.label }}
-                    </i-option>
-                </i-select>
-            </div>
-            <div style="margin-bottom: 20px">
-                <checkbox-group v-model="create.fruit">
-                    创建：
-                    <Checkbox label="控制器"></Checkbox>
-                    <Checkbox label="模型"></Checkbox>
-                    <Checkbox label="视图" v-if="create.selectVal == '后台'"></Checkbox>
-                </checkbox-group>
-            </div>
-            <div style="margin-bottom: 20px">
-                控制器名称：
-                <i-input v-model="controllerName" prefix="ios-construct" placeholder="如果不填写则按照表名命名"
-                         style="width: auto"/>
-            </div>
-            <div style="margin-bottom: 20px">
-                展示名称：
-                <i-input v-model="showName" placeholder="展示名称"
-                         style="width: auto"/>
-            </div>
-            <div style="margin-bottom: 20px">
-                <checkbox-group v-model="create.model">
-                    模型选项：
-                    <Checkbox label="自动时间戳"></Checkbox>
-                    <Checkbox label="开启软删"></Checkbox>
-                </checkbox-group>
-            </div>
-            <div style="margin-bottom: 20px" v-if="create.selectVal == '前台'">
-                <checkbox-group v-model="create.allow">
-                    允许的操作：
-                    <Checkbox label="get"></Checkbox>
-                    <Checkbox label="post"></Checkbox>
-                    <Checkbox label="put"></Checkbox>
-                    <Checkbox label="delete"></Checkbox>
-                </checkbox-group>
-            </div>
-            <div style="margin-bottom: 20px" v-if="create.selectVal == '前台'">
-                登录访问：
-                <radio-group v-model="create.login" type="button">
-                    <Radio label="是"></Radio>
-                    <Radio label="否"></Radio>
-                </radio-group>
-            </div>
-            <i-table border :columns="columns" :data="create.pageData">
-                <template slot-scope="{ row, index }" slot="showName">
-                    <i-input type="text" v-model="create.pageData[index].label"/>
-                </template>
-                <template slot-scope="{ row, index }" slot="curd">
-                    <checkbox-group v-model="create.pageData[index].curd">
-                        <Checkbox label="增"></Checkbox>
-                        <Checkbox label="改"></Checkbox>
-                        <Checkbox :label="create.selectVal == '前台'?'列表':'查'"></Checkbox>
-                        <Checkbox label="详情" v-if="create.selectVal == '前台'"></Checkbox>
+            <alert closable>* 模型位于app/common/model目录，前后台通用。</alert>
+            <i-form :model="generateForm" :label-width="100" @submit.native.prevent="generate">
+                <form-item label="应用名">
+                    <i-input v-model="generateForm.appName" placeholder="单应用无需填写" style="width: auto"/>
+                    <!--todo 加载缓存-->
+                </form-item>
+                <form-item label="数据表">
+                    <i-select style="width:200px" v-model="generateForm.tableName" @on-change="tableChange" filterable>
+                        <i-option v-for="item in tableData" :value="item.value" :key="item.value">{{ item.label }}
+                        </i-option>
+                    </i-select>
+                    <i-button type="text" icon="md-refresh" @click="getTableData"></i-button>
+                </form-item>
+                <form-item label="创建">
+                    <checkbox-group v-model="generateForm.fruit">
+                        <Checkbox label="控制器"></Checkbox>
+                        <Checkbox label="模型"></Checkbox>
+                        <Checkbox label="视图"></Checkbox>
                     </checkbox-group>
-                </template>
-                <template slot-scope="{ row, index }" slot="search">
-                    <i-switch v-model="create.pageData[index].search">
-                        <span slot="open">是</span>
-                        <span slot="close">否</span>
-                    </i-switch>
-                </template>
-                <template slot-scope="{ row, index }" slot="business">
-                    <i-select v-model="create.pageData[index].business" :transfer="true">
-                        <i-option value="text">文本</i-option>
-                        <i-option value="number">整数</i-option>
-                        <i-option value="date">日期选择</i-option>
-                        <i-option value="datetime">日期时间选择</i-option>
-                        <i-option value="select">选择器</i-option>
-                        <i-option value="uploadImage">上传图片</i-option>
-                        <i-option value="ueditor">富文本编辑器</i-option>
-                        <i-option value="textarea">多行文本</i-option>
-                    </i-select>
-                </template>
-                <template slot-scope="{ row, index }" slot="sort">
-                    <i-select v-model="create.pageData[index].sort" :transfer="true" :clearable="true">
-                        <i-option value="asc">升序</i-option>
-                        <i-option value="desc">降序</i-option>
-                    </i-select>
-                </template>
-                <template slot-scope="{ row, index }" slot="require">
-                    <i-switch v-model="create.pageData[index].require">
-                        <span slot="open">是</span>
-                        <span slot="close">否</span>
-                    </i-switch>
-                </template>
-                <template slot-scope="{ row, index }" slot="autotype">
-                    <i-select v-model="create.pageData[index].autotype" :transfer="true" :clearable="true">
-                        <i-option value="serialize">serialize</i-option>
-                        <i-option value="json">json</i-option>
-                        <i-option value="datetime">datetime</i-option>
-                        <i-option value="timestamp">timestamp</i-option>
-                        <i-option value="integer">integer</i-option>
-                        <i-option value="float">float</i-option>
-                        <i-option value="boolean">boolean</i-option>
-                        <i-option value="array">array</i-option>
-                        <i-option value="object">object</i-option>
-                    </i-select>
-                </template>
-            </i-table>
-            <Alert v-show="showRouterTips">
-                请在router.js中合适的位置添加路由，以下代码仅供参考：
-                <template slot="desc"><span v-html="routerTips"></span></template>
-            </Alert>
-            <i-button type="primary" long style="margin-top: 20px" size="large" :disabled="buttonDisabled"
-                      @click.native="generate">生成代码
-            </i-button>
+                </form-item>
+                <form-item label="控制器名称">
+                    <i-input v-model="generateForm.controllerName" prefix="md-construct" placeholder="如果不填写则按照表名命名"
+                             style="width: auto"/>
+                </form-item>
+                <form-item label="展示名称">
+                    <i-input v-model="generateForm.showName" placeholder="展示名称" style="width: auto"/>
+                </form-item>
+                <form-item label="模型选项">
+                    <checkbox-group v-model="generateForm.model">
+                        <Checkbox label="自动时间戳"></Checkbox>
+                        <Checkbox label="开启软删"></Checkbox>
+                    </checkbox-group>
+                </form-item>
+                <form-item label="允许的操作">
+                    <checkbox-group v-model="generateForm.allow">
+                        <Checkbox label="get"></Checkbox>
+                        <Checkbox label="post"></Checkbox>
+                        <Checkbox label="put"></Checkbox>
+                        <Checkbox label="delete"></Checkbox>
+                    </checkbox-group>
+                </form-item>
+                <form-item label="登录访问">
+                    <radio-group v-model="generateForm.login" type="button">
+                        <Radio label="是"></Radio>
+                        <Radio label="否"></Radio>
+                    </radio-group>
+                </form-item>
+                <form-item :label-width="0">
+                    <i-table border :columns="columns" :data="generateForm.pageData">
+                        <template slot-scope="{ row, index }" slot="showName">
+                            <i-input type="text" v-model="generateForm.pageData[index].label"/>
+                        </template>
+                        <template slot-scope="{ row, index }" slot="curd">
+                            <checkbox-group v-model="generateForm.pageData[index].curd">
+                                <Checkbox label="增"></Checkbox>
+                                <Checkbox label="改"></Checkbox>
+                                <Checkbox label="列表"></Checkbox>
+                                <Checkbox label="详情"></Checkbox>
+                            </checkbox-group>
+                        </template>
+                        <template slot-scope="{ row, index }" slot="search">
+                            <i-switch v-model="generateForm.pageData[index].search">
+                                <span slot="open">是</span>
+                                <span slot="close">否</span>
+                            </i-switch>
+                        </template>
+                        <template slot-scope="{ row, index }" slot="business">
+                            <i-select v-model="generateForm.pageData[index].business" :transfer="true">
+                                <i-option value="text">文本</i-option>
+                                <i-option value="number">整数</i-option>
+                                <i-option value="date">日期选择</i-option>
+                                <i-option value="datetime">日期时间选择</i-option>
+                                <i-option value="select">选择器</i-option>
+                                <i-option value="uploadImage">上传图片</i-option>
+                                <i-option value="ueditor">富文本编辑器</i-option>
+                                <i-option value="textarea">多行文本</i-option>
+                            </i-select>
+                        </template>
+                        <template slot-scope="{ row, index }" slot="sort">
+                            <i-select v-model="generateForm.pageData[index].sort" :transfer="true" :clearable="true">
+                                <i-option value="asc">升序</i-option>
+                                <i-option value="desc">降序</i-option>
+                            </i-select>
+                        </template>
+                        <template slot-scope="{ row, index }" slot="require">
+                            <i-switch v-model="generateForm.pageData[index].require">
+                                <span slot="open">是</span>
+                                <span slot="close">否</span>
+                            </i-switch>
+                        </template>
+                        <template slot-scope="{ row, index }" slot="autotype">
+                            <i-select v-model="generateForm.pageData[index].autotype" :transfer="true"
+                                      :clearable="true">
+                                <i-option value="serialize">serialize</i-option>
+                                <i-option value="json">json</i-option>
+                                <i-option value="datetime">datetime</i-option>
+                                <i-option value="timestamp">timestamp</i-option>
+                                <i-option value="integer">integer</i-option>
+                                <i-option value="float">float</i-option>
+                                <i-option value="boolean">boolean</i-option>
+                                <i-option value="array">array</i-option>
+                                <i-option value="object">object</i-option>
+                            </i-select>
+                        </template>
+                    </i-table>
+                </form-item>
+                <Alert v-show="showRouterTips">
+                    请在router.js中合适的位置添加路由，以下代码仅供参考：
+                    <template slot="desc"><span v-html="routerTips"></span></template>
+                </Alert>
+
+                <form-item :label-width="0">
+                    <i-button type="primary" long size="large" :disabled="buttonDisabled" html-type="submit">生成代码
+                    </i-button>
+                </form-item>
+            </i-form>
         </i-content>
         <i-content class="content" v-else>
             <div class="table-wrap">
@@ -202,19 +199,19 @@
         data() {
             return {
                 titleStatus: 1,//1:代码生成，2：关联关系
-                create: {
+                generateForm: {
                     fruit: ['控制器', '模型', '视图'],//创建模型，视图，控制器复选框
                     model: [],
                     pageData: [],//页面数据
-                    selectVal: '后台',
                     delete: '否',
                     time: '否',
                     login: '是',
-                    allow: []
+                    allow: [],
+                    controllerName: '',//控制器名称
+                    appName: '',//应用名
+                    showName: '',
+                    tableName: '',//数据表名
                 },
-                controllerName: '',//控制器名称
-                showName: '',
-                tableName: '',//数据表名
                 tableData: [],//数据表数据
                 buttonDisabled: true,//生成代码按钮
                 relevanceButton: true,//生成关联关系按钮
@@ -255,28 +252,21 @@
                 ];
                 if (this.titleStatus == 1) {
                     data.push({
-                        title: '名称',
-                        slot: 'showName',
-                    }, {
-                        title: '操作',
-                        slot: 'curd',
-                    });
-                    if (this.create.selectVal == '后台') {
-                        data.push(
-                            {
-                                title: '检索',
-                                slot: 'search',
-                            },
-                            {
-                                title: '业务类型',
-                                slot: 'business',
-                            })
-                    }
-                    data.push({
+                            title: '名称',
+                            slot: 'showName',
+                        }, {
+                            title: '操作',
+                            slot: 'curd',
+                        }, {
+                            title: '检索',
+                            slot: 'search',
+                        }, {
+                            title: '业务类型',
+                            slot: 'business',
+                        }, {
                             title: '排序',
                             slot: 'sort',
-                        },
-                        {
+                        }, {
                             title: '必填',
                             width: 80,
                             align: 'center',
@@ -372,12 +362,12 @@
                             res.data.data.map((subItem) => {
                                 //模型参数
                                 if (subItem.name == 'create_time' || subItem.name == 'update_time') {
-                                    if (this.create.model.indexOf('自动时间戳') < 0) {
-                                        this.create.model.push('自动时间戳');
+                                    if (this.generateForm.model.indexOf('自动时间戳') < 0) {
+                                        this.generateForm.model.push('自动时间戳');
                                     }
                                 } else if (subItem.name == 'delete_time') {
-                                    if (this.create.model.indexOf('开启软删') < 0) {
-                                        this.create.model.push('开启软删');
+                                    if (this.generateForm.model.indexOf('开启软删') < 0) {
+                                        this.generateForm.model.push('开启软删');
                                     }
                                 }
                                 //操作
@@ -427,7 +417,7 @@
                                     }
                                 }
                             });
-                            this.create.pageData = res.data.data
+                            this.generateForm.pageData = res.data.data
                         } else {
                             this.$Message.error(res.data.msg);
                         }
@@ -436,9 +426,9 @@
             },
             tableChange(table) {
                 //当选择框发生变化
-                this.create.fruit = ['控制器', '模型', '视图'];
-                this.create.model = [];
-                this.create.allow = ['get', 'post', 'put', 'delete'];
+                this.generateForm.fruit = ['控制器', '模型'];
+                this.generateForm.model = [];
+                this.generateForm.allow = ['get', 'post', 'put', 'delete'];
                 this.buttonDisabled = false;
                 this.getTableFieldData(table);
                 this.showRouterTips = false;
@@ -449,20 +439,15 @@
             },
             generate() {
                 //生成代码按钮
-                axios.post('/generate/generate', {
-                    data: this.create,
-                    tableName: this.tableName,
-                    controllerName: this.controllerName,
-                    showName: this.showName
-                }).then(
+                axios.post('/generate/generate', this.generateForm).then(
                     res => {
-                        this.$Notice.open({
-                            title: '操作完成',
-                            desc: res.data.data.message
-                        });
-                        if (typeof res.data.data.router === 'string') {
-                            this.routerTips = res.data.data.router;
-                            this.showRouterTips = true;
+                        if(res.data.code==1) {
+                            this.$Notice.open({
+                                title: '操作完成',
+                                desc: res.data.data.message
+                            });
+                        }else{
+                            this.$Message.error(res.data.msg);
                         }
                     }
                 );
@@ -505,18 +490,11 @@
             }
         },
         computed: {
-            getSelectVal() {
-                return this.create.selectVal
-            },
-            getModel() {
-                return this.create.model
-            }
+            // getModel() {
+            //     return this.create.model
+            // }
         },
         watch: {
-            getSelectVal(new_val, old_val) {
-                this.create.selectVal = new_val;
-                this.columns = this.getColumns()
-            },
             titleStatus(new_val, old_val) {
                 if (new_val === 2) {
                     this.getModelData();
@@ -527,19 +505,19 @@
                 }
                 this.columns = this.getColumns()
             },
-            getModel(new_val, old_val) {
+            "generateForm.model":(new_val, old_val) =>{
                 let updateTips = false;
                 let createTips = false;
                 let deleteTips = false;
-                for (let x in this.create.pageData) {
-                    if (this.create.pageData[x].name === 'create_time') {
-                        createTips = this.create.pageData[x].type
+                for (let x in this.generateForm.pageData) {
+                    if (this.generateForm.pageData[x].name === 'create_time') {
+                        createTips = this.generateForm.pageData[x].type
                     }
-                    if (this.create.pageData[x].name === 'update_time') {
-                        updateTips = this.create.pageData[x].type
+                    if (this.generateForm.pageData[x].name === 'update_time') {
+                        updateTips = this.generateForm.pageData[x].type
                     }
-                    if (this.create.pageData[x].name === 'delete_time') {
-                        deleteTips = this.create.pageData[x].type
+                    if (this.generateForm.pageData[x].name === 'delete_time') {
+                        deleteTips = this.generateForm.pageData[x].type
                     }
                 }
                 if (new_val.indexOf('自动时间戳') >= 0 && old_val.indexOf('自动时间戳') < 0) {
