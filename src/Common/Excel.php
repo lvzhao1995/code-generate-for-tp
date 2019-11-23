@@ -1,6 +1,6 @@
 <?php
 
-namespace app\common\helper;
+namespace Generate\Common;
 
 use ArrayAccess;
 use Closure;

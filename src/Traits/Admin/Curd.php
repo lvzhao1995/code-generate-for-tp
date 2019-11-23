@@ -2,8 +2,8 @@
 
 namespace Generate\Traits\Admin;
 
-use app\common\helper\Excel;
 use Closure;
+use Generate\Common\Excel;
 use think\Db;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
