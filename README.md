@@ -248,6 +248,19 @@ public function returnFail($failMessage = '操作失败', $code = null)
 * 务必将根目录下的generate.lock文件删除
 * 本项目建议在php7.0以上的环境中运行，如使用php5.6，请将php.ini中的`always_populate_raw_post_data`值改为-1
 
+## 数据导出功能
+项目提供了数据导出功能，基于`phpoffice/phpspreadsheet`开发，需自行安装依赖。\
+在需要使用导出功能的控制器中添加`exportColumn` `exportName` `exportTitle`属性，浏览器直接访问`export`方法即可，支持搜索条件。
+```php
+$exportColumn = []; 
+     // 可接受['key'=>'列名']格式，
+     // 或['key'=>['width'=>80,'title'=>'列名','callback'=>function(Cell $cell,$row,$index){}]]格式，各项都可选
+$fileName = ''; 
+    // 导出的文件名，可接受闭包
+$title = '';
+    // 表标题（第一行合并单元格显示）,可传入闭包，接收Cell对象
+```
+
 ## 参考文档
 * [ThinkPHP5.0完全开发手册](https://www.kancloud.cn/manual/thinkphp5/118003)
 * [Vue](https://cn.vuejs.org/v2/guide/)

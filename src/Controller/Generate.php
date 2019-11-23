@@ -75,7 +75,6 @@ class Generate extends Controller
 
     /**
      * 获取对应数据表的字段数据
-     * @param Request $request
      * @return false|string|void
      */
     public function getTableFieldData(Request $request)
@@ -129,7 +128,6 @@ class Generate extends Controller
 
     /**
      * 生成
-     * @param Request $request
      * @throws GuzzleException
      */
     public function generate(Request $request)
@@ -1109,7 +1107,6 @@ CODE;
 
     /**
      * 生成关联关系
-     * @param Request $request
      */
     public function generateRelation(Request $request)
     {

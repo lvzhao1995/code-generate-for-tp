@@ -29,7 +29,6 @@ use think\response\Json;
 trait Curd
 {
     /**
-     * @param Request $request
      * @return Json|void
      * @throws DbException
      */
@@ -171,7 +170,6 @@ trait Curd
 
     /**
      * 增
-     * @param Request $request
      * @return Json|void
      */
     protected function post(Request $request)
@@ -218,7 +216,6 @@ trait Curd
 
     /**
      * 获取模型的主键值
-     * @param Model $model
      * @param mixed $pk
      * @return array|mixed
      */
@@ -249,7 +246,6 @@ trait Curd
 
     /**
      * 改
-     * @param Request $request
      * @return Json|void
      */
     protected function put(Request $request)
@@ -315,7 +311,6 @@ trait Curd
 
     /**
      * 删
-     * @param Request $request
      * @return Json|void
      * @throws DbException
      */
