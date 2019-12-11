@@ -19,9 +19,9 @@ class Generate extends Controller
     use JsonReturn;
     protected $config = [];
 
-    public function _initialize()
+    public function initialize()
     {
-        parent::_initialize();
+        parent::initialize();
         if (!Config::get('app_debug')) {
             throw new HttpException(404, 'module not exists:Generate');
         }
@@ -55,7 +55,6 @@ class Generate extends Controller
 
     /**
      * 获取对应数据表的字段数据
-     * @param Request $request
      * @return false|string|void
      */
     public function getTableFieldData(Request $request)
@@ -109,7 +108,6 @@ class Generate extends Controller
 
     /**
      * 生成
-     * @param Request $request
      * @throws GuzzleException
      */
     public function generate(Request $request)
@@ -709,7 +707,7 @@ CODE;
             ]);
             $code = $response->getStatusCode();
             if ($code == 200) {
-                $body = json_decode((string)$response->getBody(), true);
+                $body = json_decode((string) $response->getBody(), true);
                 return $body['errmsg'];
             }
             return '请求出错';
@@ -851,7 +849,7 @@ CODE;
         $searchHtml = '';
         $tableColumns = [];
         $searchField = [];
-        $tpl = Config::get('curd');
+        $tpl = Config::get('curd.');
         foreach ($data['pageData'] as $k => $v) {
             if (in_array('查', $v['curd'])) {
                 $tableColumns[] = [
@@ -910,7 +908,7 @@ CODE;
             return 'add视图已存在';
         }
 
-        $tpl = Config::get('curd');
+        $tpl = Config::get('curd.');
         $html = '';
         $formField = [];
         foreach ($data['pageData'] as $k => $v) {
@@ -964,7 +962,7 @@ CODE;
         }
 
         $html = '';
-        $tpl = Config::get('curd');
+        $tpl = Config::get('curd.');
         $formField = [];
         foreach ($data['pageData'] as $k => $v) {
             if (in_array('改', $v['curd'])) {
@@ -1088,7 +1086,6 @@ CODE;
 
     /**
      * 生成关联关系
-     * @param Request $request
      */
     public function generateRelation(Request $request)
     {
