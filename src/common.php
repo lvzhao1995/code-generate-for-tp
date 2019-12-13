@@ -1,7 +1,6 @@
 <?php
 
 use think\Console;
-use think\Db;
 use think\db\Query;
 use think\facade\Cache;
 use think\facade\Config;

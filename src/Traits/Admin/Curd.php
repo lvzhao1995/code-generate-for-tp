@@ -31,7 +31,6 @@ trait Curd
 {
     /**
      * 列表页
-     * @param Request $request
      * @throws DbException
      */
     public function index(Request $request)
@@ -125,7 +124,6 @@ trait Curd
 
     /**
      * 新增数据页
-     * @param Request $request
      */
     public function add(Request $request)
     {
@@ -165,7 +163,6 @@ trait Curd
 
     /**
      * 获取模型的主键值
-     * @param Model $model
      * @param mixed $pk
      * @return array|mixed
      */
@@ -187,7 +184,6 @@ trait Curd
 
     /**
      * 编辑数据页
-     * @param Request $request
      */
     public function edit(Request $request)
     {
@@ -242,7 +238,6 @@ trait Curd
 
     /**
      * 删除
-     * @param Request $request
      */
     public function delete(Request $request)
     {
@@ -265,11 +260,11 @@ trait Curd
         }
         Db::startTrans();
         try {
-            $data->delete();
             if (is_string($pk)) {
                 $pkValue = $pkValue[$pk];
             }
-            $this->deleteEnd($pkValue);
+            $this->deleteEnd($pkValue, $data);
+            $data->delete();
         } catch (HttpResponseException $e) {
             Db::rollback();
             throw $e;

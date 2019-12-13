@@ -68,9 +68,10 @@ interface CurdInterface
     /**
      * 成功删除数据后的数据捕获
      * @param mixed $pk 要删除数据的主键值，多主键传入数组
+     * @param array|Model $data
      * @return mixed
      */
-    public function deleteEnd($pk);
+    public function deleteEnd($pk, $data);
 
     /**
      * 分页数据捕获，用于追加数据

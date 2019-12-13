@@ -110,9 +110,10 @@ trait Common
      * 成功删除数据后的数据捕获
      * 通过$this->returnFail($message);将错误信息返回到前端，并且回滚数据
      * @param int|array $pk 要删除数据的主键值，多主键则传入数组
+     * @param array|Model $data
      * @return mixed|void
      */
-    public function deleteEnd($pk)
+    public function deleteEnd($pk, $data)
     {
     }
 }
