@@ -783,9 +783,8 @@ namespace app\admin\controller;
 
 use Generate\Traits\Admin\Common;
 use Generate\Traits\Admin\Curd;
-use Generate\Traits\Admin\CurdInterface;
 
-class {$controllerName} extends {$baseController} implements curdInterface
+class {$controllerName} extends {$baseController}
 {
     /**
      * 特别说明

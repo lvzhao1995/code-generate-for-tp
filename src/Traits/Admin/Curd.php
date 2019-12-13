@@ -3,7 +3,10 @@
 namespace Generate\Traits\Admin;
 
 use Exception;
+use Generate\Common\Excel;
 use think\Db;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\ModelNotFoundException;
 use think\exception\DbException;
 use think\exception\HttpResponseException;
 use think\Model;
@@ -274,5 +277,71 @@ trait Curd
         }
         Db::commit();
         $this->returnSuccess();
+    }
+
+    /**
+     * 数据导出为excel
+     * @throws Exception
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws ModelNotFoundException
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
+    public function export(Request $request)
+    {
+        $special = [];
+        $onlyArr = [];
+        $where = [];
+        foreach ($this->searchField as $k => $v) {
+            if (is_array($v)) {
+                $key = key($v);
+                $val = $v[$key];
+                $onlyArr[] = $key;
+                $special[$key] = $val;
+            } else {
+                $onlyArr[] = $v;
+            }
+        }
+        $relationSearch = '';
+        $whereData = $this->search($request->only($onlyArr), $special, $relationSearch);
+        foreach ($whereData as $k => $v) {
+            if ($k != 'pageSize' && $k != 'RelationSearch') {
+                switch ($v['type']) {
+                    case 'select':
+                        $where[$v['field'] ?: $k] = $v['val'];
+                        break;
+                    case 'time_start':
+                        $where[$v['field'] ?: $k][] = ['>= time', $v['val'] . ' 00:00:00'];
+                        break;
+                    case 'time_end':
+                        $where[$v['field'] ?: $k][] = ['<= time', $v['val'] . ' 23:59:59'];
+                        break;
+                    default:
+                        $where[$v['field'] ?: $k] = ['like', "%{$v['val']}%"];
+                        break;
+                }
+            }
+        }
+
+        $model = model($this->modelName);
+        $model->field($this->indexField)->where($where);
+
+        $list = $this->indexQuery($model)->order($this->orderField)->select();
+
+        foreach ($list as $index => $item) {
+            $this->pageEach($item, $index);
+        }
+        if (!property_exists($this, 'exportColumn')) {
+            throw new Exception('请在当前控制器中配置exportColumn属性');
+        }
+        if (!property_exists($this, 'exportName')) {
+            throw new Exception('请在当前控制器中配置exportName属性');
+        }
+        $title = '';
+        if (property_exists($this, 'exportTitle')) {
+            $title = $this->exportTitle;
+        }
+        Excel::export($this->exportColumn, $list, $this->exportName, $title);
     }
 }
