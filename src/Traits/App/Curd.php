@@ -347,6 +347,7 @@ trait Curd
             }
             $this->deleteEnd($pkValue, $data);
             $data->delete();
+            Db::commit();
         } catch (HttpResponseException $e) {
             Db::rollback();
             throw $e;
