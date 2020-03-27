@@ -57,7 +57,7 @@ trait Curd
             if ($k != 'pageSize' && $k != 'RelationSearch') {
                 switch ($v['type']) {
                     case 'select':
-                        $where[$v['field'] ?: $k] = $v['val'];
+                        $where[$v['field'] ?: $k] = ['eq', $v['val']];
                         break;
                     case 'time_start':
                         $where[$v['field'] ?: $k][] = ['>= time', $v['val'] . ' 00:00:00'];
@@ -84,9 +84,11 @@ trait Curd
         }
         $sql->where($where);
 
-        $list = $this->indexQuery($sql)->order($this->orderField)->paginate($pageSize)->each(function ($item, $key) {
-            return $this->pageEach($item, $key);
-        });
+        $list = $this->indexQuery($sql)->order($this->orderField)->paginate($pageSize)->each(
+            function ($item, $key) {
+                return $this->pageEach($item, $key);
+            }
+        );
         $this->returnSuccess($list);
     }
 
@@ -309,7 +311,7 @@ trait Curd
             if ($k != 'pageSize' && $k != 'RelationSearch') {
                 switch ($v['type']) {
                     case 'select':
-                        $where[$v['field'] ?: $k] = $v['val'];
+                        $where[$v['field'] ?: $k] = ['eq', $v['val']];
                         break;
                     case 'time_start':
                         $where[$v['field'] ?: $k][] = ['>= time', $v['val'] . ' 00:00:00'];
