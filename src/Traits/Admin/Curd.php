@@ -66,7 +66,7 @@ trait Curd
                         $where[$v['field'] ?: $k][] = ['<= time', $v['val'] . ' 23:59:59'];
                         break;
                     default:
-                        $where[$v['field'] ?: $k] = ['like', "%{$v['val']}%"];
+                        $where[] = [$v['field'] ?: $k, 'like', "%{$v['val']}%"];
                         break;
                 }
             }
