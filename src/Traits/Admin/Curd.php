@@ -7,6 +7,7 @@ use Generate\Common\Excel;
 use think\Db;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
+use think\db\Query;
 use think\exception\DbException;
 use think\exception\HttpResponseException;
 use think\Model;
@@ -40,7 +41,6 @@ trait Curd
     {
         $special = [];
         $onlyArr = [];
-        $where = [];
         foreach ($this->searchField as $k => $v) {
             if (is_array($v)) {
                 $key = key($v);
@@ -53,24 +53,6 @@ trait Curd
         }
         $relationSearch = '';
         $whereData = $this->search($request->only($onlyArr), $special, $relationSearch);
-        foreach ($whereData as $k => $v) {
-            if ($k != 'pageSize' && $k != 'RelationSearch') {
-                switch ($v['type']) {
-                    case 'select':
-                        $where[$v['field'] ?: $k] = ['eq', $v['val']];
-                        break;
-                    case 'time_start':
-                        $where[$v['field'] ?: $k][] = ['>= time', $v['val'] . ' 00:00:00'];
-                        break;
-                    case 'time_end':
-                        $where[$v['field'] ?: $k][] = ['<= time', $v['val'] . ' 23:59:59'];
-                        break;
-                    default:
-                        $where[$v['field'] ?: $k] = ['like', "%{$v['val']}%"];
-                        break;
-                }
-            }
-        }
         $pageSize = $request->param('pageSize') ?: $this->pageLimit;
 
         if (!empty($relationSearch)) {
@@ -79,10 +61,10 @@ trait Curd
             $model = model($this->modelName);
         }
         $sql = $model->field($this->indexField);
+        $this->setWhere($whereData, $sql);
         if ($this->cache) {
             $sql->cache(true, 0, $this->modelName . '_cache_data');
         }
-        $sql->where($where);
 
         $list = $this->indexQuery($sql)->order($this->orderField)->paginate($pageSize)->each(
             function ($item, $key) {
@@ -125,6 +107,34 @@ trait Curd
             }
         }
         return $whereData;
+    }
+
+    /**
+     * 设置搜索条件
+     * @param array $whereData
+     * @param Model|Query $model
+     */
+    protected function setWhere($whereData, $model)
+    {
+        foreach ($whereData as $k => $v) {
+            if ($k != 'pageSize' && $k != 'RelationSearch') {
+                $field = $v['field'] ?: $k;
+                switch ($v['type']) {
+                    case 'select':
+                        $model->where($field, $v['val']);
+                        break;
+                    case 'time_start':
+                        $model->whereTime($field, '>=', $v['val'] . ' 00:00:00');
+                        break;
+                    case 'time_end':
+                        $model->whereTime($field, '<=', $v['val'] . ' 23:59:59');
+                        break;
+                    default:
+                        $model->where($field, 'like', "%{$v['val']}%");
+                        break;
+                }
+            }
+        }
     }
 
     /**
@@ -294,7 +304,6 @@ trait Curd
     {
         $special = [];
         $onlyArr = [];
-        $where = [];
         foreach ($this->searchField as $k => $v) {
             if (is_array($v)) {
                 $key = key($v);
@@ -307,27 +316,10 @@ trait Curd
         }
         $relationSearch = '';
         $whereData = $this->search($request->only($onlyArr), $special, $relationSearch);
-        foreach ($whereData as $k => $v) {
-            if ($k != 'pageSize' && $k != 'RelationSearch') {
-                switch ($v['type']) {
-                    case 'select':
-                        $where[$v['field'] ?: $k] = ['eq', $v['val']];
-                        break;
-                    case 'time_start':
-                        $where[$v['field'] ?: $k][] = ['>= time', $v['val'] . ' 00:00:00'];
-                        break;
-                    case 'time_end':
-                        $where[$v['field'] ?: $k][] = ['<= time', $v['val'] . ' 23:59:59'];
-                        break;
-                    default:
-                        $where[$v['field'] ?: $k] = ['like', "%{$v['val']}%"];
-                        break;
-                }
-            }
-        }
 
         $model = model($this->modelName);
-        $model->field($this->indexField)->where($where);
+        $this->setWhere($whereData, $model);
+        $model->field($this->indexField);
 
         $list = $this->indexQuery($model)->order($this->orderField)->select();
 
