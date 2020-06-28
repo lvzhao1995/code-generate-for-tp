@@ -16,32 +16,32 @@ class Generate extends Command
     protected function execute(Input $input, Output $output)
     {
         //询问是否需要其他功能
-        if (function_exists('system')) {
-            $needPay = $output->confirm($input, 'Do you need payment in your project?', false);
-            if ($needPay) {
-                system('composer require hxc/qt-pay');
-                $output->writeln('---------------------------------------');
-                $output->writeln('Payment function has been introduced, please check the documentation for detailed usage.');
-            }
-            $needSms = $output->confirm($input, 'Do you need SMS in your project?', false);
-            if ($needSms) {
-                system('composer require hxc/qt-sms');
-                $output->writeln('---------------------------------------');
-                $output->writeln('SMS has been introduced, please see the documentation for detailed usage.');
-            }
-            $needQueue = $output->confirm($input, 'Do you need the queue in your project?', false);
-            if ($needQueue) {
-                system('composer require topthink/think-queue:~1.0');
-                $output->writeln('---------------------------------------');
-                $output->writeln('Queue function has been introduced, please see the documentation for detailed usage.');
-            }
-        } else {
-            $output->writeln('---------------------------------------');
-            $output->writeln('The system function has been disabled, please execute the following code according to your project needs:');
-            $output->writeln('payment：composer require hxc/qt-pay');
-            $output->writeln('sms：composer require hxc/qt-sms');
-            $output->writeln('queue：composer require topthink/think-queue:~1.0');
-        }
+//        if (function_exists('system')) {
+//            $needPay = $output->confirm($input, 'Do you need payment in your project?', false);
+//            if ($needPay) {
+//                system('composer require hxc/qt-pay');
+//                $output->writeln('---------------------------------------');
+//                $output->writeln('Payment function has been introduced, please check the documentation for detailed usage.');
+//            }
+//            $needSms = $output->confirm($input, 'Do you need SMS in your project?', false);
+//            if ($needSms) {
+//                system('composer require hxc/qt-sms');
+//                $output->writeln('---------------------------------------');
+//                $output->writeln('SMS has been introduced, please see the documentation for detailed usage.');
+//            }
+//            $needQueue = $output->confirm($input, 'Do you need the queue in your project?', false);
+//            if ($needQueue) {
+//                system('composer require topthink/think-queue:~1.0');
+//                $output->writeln('---------------------------------------');
+//                $output->writeln('Queue function has been introduced, please see the documentation for detailed usage.');
+//            }
+//        } else {
+//            $output->writeln('---------------------------------------');
+//            $output->writeln('The system function has been disabled, please execute the following code according to your project needs:');
+//            $output->writeln('payment：composer require hxc/qt-pay');
+//            $output->writeln('sms：composer require hxc/qt-sms');
+//            $output->writeln('queue：composer require topthink/think-queue:~1.0');
+//        }
         $doc = '这是代码生成器所需文件。';
 
         file_put_contents(ROOT_PATH . 'generate.lock', $doc);
