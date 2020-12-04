@@ -1045,7 +1045,7 @@ META;
         $use = "use think\Model;\n";
         $time_status = 'false';
         if (in_array('开启软删', $data['model'])) {
-            $use .= "think\model\concern\SoftDelete;\n";
+            $use .= "use think\model\concern\SoftDelete;\n";
             $mainCode .= "use SoftDelete;\n";
         }
 
