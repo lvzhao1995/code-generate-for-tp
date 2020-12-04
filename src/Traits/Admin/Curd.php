@@ -302,6 +302,12 @@ trait Curd
      */
     public function export(Request $request)
     {
+        if (!property_exists($this, 'exportColumn')) {
+            throw new Exception('请在当前控制器中配置exportColumn属性');
+        }
+        if (!property_exists($this, 'exportName')) {
+            throw new Exception('请在当前控制器中配置exportName属性');
+        }
         $special = [];
         $onlyArr = [];
         foreach ($this->searchField as $k => $v) {
@@ -326,16 +332,10 @@ trait Curd
         foreach ($list as $index => $item) {
             $this->pageEach($item, $index);
         }
-        if (!property_exists($this, 'exportColumn')) {
-            throw new Exception('请在当前控制器中配置exportColumn属性');
-        }
-        if (!property_exists($this, 'exportName')) {
-            throw new Exception('请在当前控制器中配置exportName属性');
-        }
         $title = '';
         if (property_exists($this, 'exportTitle')) {
             $title = $this->exportTitle;
         }
-        Excel::export($this->exportColumn, $list, $this->exportName, $title);
+        Excel::export($this->exportColumn, $list->toArray(), $this->exportName, $title);
     }
 }
