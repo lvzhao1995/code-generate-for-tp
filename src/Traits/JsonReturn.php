@@ -34,9 +34,9 @@ trait JsonReturn
             $code = Config::get('curd.success_code');
         }
         $data = [
-            'code' => $code,
+            'code'   => $code,
             'status' => 'success',
-            'data' => $res,
+            'data'   => $res,
         ];
         $data['data'] = $res;
         throw new HttpResponseException(json($data));
@@ -52,9 +52,9 @@ trait JsonReturn
             $code = Config::get('curd.error_code');
         }
         $data = [
-            'code' => $code,
+            'code'   => $code,
             'status' => 'fail',
-            'msg' => $failMessage,
+            'msg'    => $failMessage,
         ];
         throw new HttpResponseException(json($data));
     }

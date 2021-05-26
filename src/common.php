@@ -19,12 +19,12 @@ Console::addDefaultCommands([
 $rootPath = Env::get('root_path');
 if (!empty($rootPath) && file_exists($rootPath . '/generate.lock')) {
     Route::rules([
-        'generate/showTables' => '\\Generate\\Controller\\Generate@showTables',
-        'generate/getModelData' => '\\Generate\\Controller\\Generate@getModelData',
+        'generate/showTables'        => '\\Generate\\Controller\\Generate@showTables',
+        'generate/getModelData'      => '\\Generate\\Controller\\Generate@getModelData',
         'generate/getTableFieldData' => '\\Generate\\Controller\\Generate@getTableFieldData',
-        'generate/generate' => '\\Generate\\Controller\\Generate@generate',
-        'generate/generateRelation' => '\\Generate\\Controller\\Generate@generateRelation',
-        'generate' => '\\Generate\\Controller\\Generate@index',
+        'generate/generate'          => '\\Generate\\Controller\\Generate@generate',
+        'generate/generateRelation'  => '\\Generate\\Controller\\Generate@generateRelation',
+        'generate'                   => '\\Generate\\Controller\\Generate@index',
     ]);
 }
 

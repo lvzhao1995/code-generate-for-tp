@@ -78,7 +78,7 @@ class Generate extends Controller
                     $res[$k]['curd'] = []; //操作
                     $res[$k]['business'] = ''; //业务类型
                     $res[$k]['search'] = false; //检索
-                    $res[$k]['require'] = $v['Null'] == 'NO'; //必填
+                    $res[$k]['require'] = 'NO' == $v['Null']; //必填
                     $res[$k]['length'] = preg_replace('/\D/s', '', $v['Type']); //字段长度，不严谨
                 }
             }
@@ -96,10 +96,10 @@ class Generate extends Controller
         foreach (glob($model_path) as $k => $v) {
             $val = explode('.php', explode(DIRECTORY_SEPARATOR . 'model' . DIRECTORY_SEPARATOR, $v)[1])[0];
             $arr = [
-                'value' => $val,
-                'label' => $val,
+                'value'    => $val,
+                'label'    => $val,
                 'children' => [],
-                'loading' => false,
+                'loading'  => false,
             ];
             $res[] = $arr;
         }
@@ -132,35 +132,35 @@ class Generate extends Controller
             $response = [];
 
             //判断前台 or 后台
-            if ($data['selectVal'] == '前台') {
+            if ('前台' == $data['selectVal']) {
                 //前台
                 if (in_array('控制器', $data['fruit'])) {
                     //生成控制器
                     $controllerRes = $this->createAppController($data, $controllerName, $modelName);
-                    $responseMessage .= ($controllerRes === true ? "控制器生成成功\n" : "$controllerRes\n") . '</br>';
+                    $responseMessage .= (true === $controllerRes ? "控制器生成成功\n" : "$controllerRes\n") . '</br>';
                     //生成验证器
                     $pk = Db::name($modelName)->getPk();
                     $validateRes = $this->createAppValidate($data, $controllerName, $pk);
-                    $responseMessage .= ($validateRes === true ? "验证器生成成功，请根据业务逻辑进行配置\n" : "$validateRes\n") . '</br>';
+                    $responseMessage .= (true === $validateRes ? "验证器生成成功，请根据业务逻辑进行配置\n" : "$validateRes\n") . '</br>';
                     $documentRes = $this->createDocument($data, $controllerName, $showName, $tableName);
                     $responseMessage .= '文档生成结果：' . $documentRes . '</br>';
                 }
-            } elseif ($data['selectVal'] == '后台') {
+            } elseif ('后台' == $data['selectVal']) {
                 //后台
                 //生成控制器
                 if (in_array('控制器', $data['fruit'])) {
                     //生成控制器
                     $controllerRes = $this->createAdminController($data, $controllerName, $modelName);
-                    $responseMessage .= ($controllerRes === true ? "控制器生成成功\n" : "$controllerRes\n") . '</br>';
+                    $responseMessage .= (true === $controllerRes ? "控制器生成成功\n" : "$controllerRes\n") . '</br>';
                 }
                 //生成模板
                 if (in_array('视图', $data['fruit'])) {
                     $indexRes = $this->createIndexView($data, $controllerName);
-                    $responseMessage .= ($indexRes === true ? "index视图生成成功\n" : "$indexRes\n") . '</br>';
+                    $responseMessage .= (true === $indexRes ? "index视图生成成功\n" : "$indexRes\n") . '</br>';
                     $addRes = $this->createAddView($data, $controllerName);
-                    $responseMessage .= ($addRes === true ? "add视图生成成功\n" : "$addRes\n") . '</br>';
+                    $responseMessage .= (true === $addRes ? "add视图生成成功\n" : "$addRes\n") . '</br>';
                     $editRes = $this->createEditView($data, $controllerName);
-                    $responseMessage .= ($editRes === true ? "edit视图生成成功\n" : "$editRes\n") . '</br>';
+                    $responseMessage .= (true === $editRes ? "edit视图生成成功\n" : "$editRes\n") . '</br>';
                     $dir = Loader::parseName($controllerName);
                     $this->createMeta($showName, $dir);
                     $response['router'] = '<p>{title: \'' . $showName . '\',to: \'/' . $dir . '\'}</p>';
@@ -171,7 +171,7 @@ class Generate extends Controller
             //生成模型
             if (in_array('模型', $data['fruit'])) {
                 $modelRes = $this->createModel($data, $modelName);
-                $responseMessage .= ($modelRes === true ? "模型生成成功\n" : "$modelRes\n") . '</br>';
+                $responseMessage .= (true === $modelRes ? "模型生成成功\n" : "$modelRes\n") . '</br>';
             }
             $response['message'] = $responseMessage;
             $this->returnSuccess($response, 1);
@@ -200,7 +200,7 @@ class Generate extends Controller
         if (empty($signController)) {
             $signController = $baseController;
         }
-        if ($data['login'] == '否') {
+        if ('否' == $data['login']) {
             $extends = 'extends ' . $baseController;
         } else {
             $extends = 'extends ' . $signController;
@@ -361,16 +361,16 @@ CODE;
         $paths = [];
 
         $index = [
-            'type' => 'object',
+            'type'        => 'object',
             'description' => '',
         ];
         $detail = [
-            'type' => 'object',
+            'type'        => 'object',
             'description' => '',
         ];
         $postParameters = [];
         $postData = [
-            'type' => 'object',
+            'type'        => 'object',
             'description' => '插入的数据主键',
         ];
         $putParameters = [];
@@ -386,7 +386,7 @@ CODE;
             if ($allowGet) {
                 if (in_array('列表', $v['curd'])) {
                     $index['properties'][$v['name']] = [
-                        'type' => 'string',
+                        'type'        => 'string',
                         'description' => $v['label'],
                     ];
                     if (in_array($v['autotype'], ['json', 'array', 'object', 'serialize'])) {
@@ -397,7 +397,7 @@ CODE;
                 }
                 if (in_array('详情', $v['curd'])) {
                     $detail['properties'][$v['name']] = [
-                        'type' => 'string',
+                        'type'        => 'string',
                         'description' => $v['label'],
                     ];
                     if (in_array($v['autotype'], ['json', 'array', 'object', 'serialize'])) {
@@ -410,11 +410,11 @@ CODE;
             if ($allowPut) {
                 if (in_array('改', $v['curd'])) {
                     $putParameters[] = [
-                        'name' => $v['name'] . (in_array($v['autotype'], ['json', 'array', 'object', 'serialize']) ? '[]' : ''),
-                        'in' => 'formData',
-                        'required' => $v['require'],
+                        'name'        => $v['name'] . (in_array($v['autotype'], ['json', 'array', 'object', 'serialize']) ? '[]' : ''),
+                        'in'          => 'formData',
+                        'required'    => $v['require'],
                         'description' => $v['label'],
-                        'type' => 'string',
+                        'type'        => 'string',
                     ];
                     if ((is_array($tablePk) && in_array($v['name'], $tablePk)) || $v['name'] == $tablePk) {
                         $hasPk[$v['name']] = true;
@@ -424,66 +424,66 @@ CODE;
             if ($allowPost) {
                 if (in_array('增', $v['curd'])) {
                     $postParameters[] = [
-                        'name' => $v['name'] . (in_array($v['autotype'], ['json', 'array', 'object', 'serialize']) ? '[]' : ''),
-                        'in' => 'formData',
-                        'required' => $v['require'],
+                        'name'        => $v['name'] . (in_array($v['autotype'], ['json', 'array', 'object', 'serialize']) ? '[]' : ''),
+                        'in'          => 'formData',
+                        'required'    => $v['require'],
                         'description' => $v['label'],
-                        'type' => 'string',
+                        'type'        => 'string',
                     ];
                 }
             }
         }
         if ($allowGet) {//列表、详情
             $paths[$path]['get'] = [
-                'tags' => ['临时分类'],
-                'summary' => $showName . '列表',
+                'tags'        => ['临时分类'],
+                'summary'     => $showName . '列表',
                 'description' => '',
-                'parameters' => [
+                'parameters'  => [
                     [
-                        'name' => 'page',
-                        'in' => 'query',
-                        'required' => false,
+                        'name'        => 'page',
+                        'in'          => 'query',
+                        'required'    => false,
                         'description' => '页码',
-                        'type' => 'string',
+                        'type'        => 'string',
                     ],
                 ],
                 'responses' => [
                     '200' => [
                         'description' => 'successful operation',
-                        'schema' => [
-                            '$schema' => 'http://json-schema.org/draft-04/schema#',
-                            'type' => 'object',
+                        'schema'      => [
+                            '$schema'    => 'http://json-schema.org/draft-04/schema#',
+                            'type'       => 'object',
                             'properties' => [
                                 'code' => [
-                                    'type' => 'number',
+                                    'type'        => 'number',
                                     'description' => '0--失败 1--成功',
                                 ],
                                 'status' => [
-                                    'type' => 'string',
+                                    'type'        => 'string',
                                     'description' => '状态值',
                                 ],
                                 'data' => [
-                                    'type' => 'object',
+                                    'type'        => 'object',
                                     'description' => '',
-                                    'properties' => [
+                                    'properties'  => [
                                         'total' => [
-                                            'type' => 'number',
+                                            'type'        => 'number',
                                             'description' => '总条数',
                                         ],
                                         'per_page' => [
-                                            'type' => 'number',
+                                            'type'        => 'number',
                                             'description' => '每页条数',
                                         ],
                                         'current_page' => [
-                                            'type' => 'number',
+                                            'type'        => 'number',
                                             'description' => '当前页',
                                         ],
                                         'last_page' => [
-                                            'type' => 'number',
+                                            'type'        => 'number',
                                             'description' => '最大页',
                                         ],
                                         'data' => [
-                                            'type' => 'array',
+                                            'type'  => 'array',
                                             'items' => $index,
                                         ],
                                     ],
@@ -496,22 +496,22 @@ CODE;
                 ],
             ];
             $paths[$detailPath]['get'] = [
-                'tags' => ['临时分类'],
-                'summary' => $showName . '详情',
+                'tags'        => ['临时分类'],
+                'summary'     => $showName . '详情',
                 'description' => '请将路径中的{id}替换为要查看的数据id',
-                'responses' => [
+                'responses'   => [
                     '200' => [
                         'description' => 'successful operation',
-                        'schema' => [
-                            '$schema' => 'http://json-schema.org/draft-04/schema#',
-                            'type' => 'object',
+                        'schema'      => [
+                            '$schema'    => 'http://json-schema.org/draft-04/schema#',
+                            'type'       => 'object',
                             'properties' => [
                                 'code' => [
-                                    'type' => 'number',
+                                    'type'        => 'number',
                                     'description' => '0--失败 1--成功',
                                 ],
                                 'status' => [
-                                    'type' => 'string',
+                                    'type'        => 'string',
                                     'description' => '状态值',
                                 ],
                                 'data' => $detail,
@@ -527,38 +527,38 @@ CODE;
                 if (is_array($tablePk)) {
                     foreach ($tablePk as $v) {
                         $postData['properties'][$v] = [
-                            'type' => 'string',
+                            'type'        => 'string',
                             'description' => '',
                         ];
                     }
                 } else {
                     $postData['properties'][$tablePk] = [
-                        'type' => 'string',
+                        'type'        => 'string',
                         'description' => '',
                     ];
                 }
             }
             $paths[$path]['post'] = [
-                'tags' => ['临时分类'],
-                'summary' => '添加' . $showName,
+                'tags'        => ['临时分类'],
+                'summary'     => '添加' . $showName,
                 'description' => '',
-                'consumes' => [
+                'consumes'    => [
                     'multipart/form-data',
                 ],
                 'parameters' => $postParameters,
-                'responses' => [
+                'responses'  => [
                     '200' => [
                         'description' => 'successful operation',
-                        'schema' => [
-                            '$schema' => 'http://json-schema.org/draft-04/schema#',
-                            'type' => 'object',
+                        'schema'      => [
+                            '$schema'    => 'http://json-schema.org/draft-04/schema#',
+                            'type'       => 'object',
                             'properties' => [
                                 'code' => [
-                                    'type' => 'number',
+                                    'type'        => 'number',
                                     'description' => '0--失败 1--成功',
                                 ],
                                 'status' => [
-                                    'type' => 'string',
+                                    'type'        => 'string',
                                     'description' => '状态值',
                                 ],
                                 'data' => $postData,
@@ -575,47 +575,47 @@ CODE;
                     foreach ($tablePk as $v) {
                         if (empty($hasPk[$v])) {
                             $putParameters[] = [
-                                'name' => $v,
-                                'in' => 'formData',
-                                'required' => true,
+                                'name'        => $v,
+                                'in'          => 'formData',
+                                'required'    => true,
                                 'description' => '',
-                                'type' => 'string',
+                                'type'        => 'string',
                             ];
                         }
                     }
                 } else {
                     if (empty($hasPk[$tablePk])) {
                         $putParameters[] = [
-                            'name' => $tablePk,
-                            'in' => 'formData',
-                            'required' => true,
+                            'name'        => $tablePk,
+                            'in'          => 'formData',
+                            'required'    => true,
                             'description' => '',
-                            'type' => 'string',
+                            'type'        => 'string',
                         ];
                     }
                 }
             }
             $paths[$path]['put'] = [
-                'tags' => ['临时分类'],
-                'summary' => '修改' . $showName,
+                'tags'        => ['临时分类'],
+                'summary'     => '修改' . $showName,
                 'description' => '',
-                'consumes' => [
+                'consumes'    => [
                     'multipart/form-data',
                 ],
                 'parameters' => $putParameters,
-                'responses' => [
+                'responses'  => [
                     '200' => [
                         'description' => 'successful operation',
-                        'schema' => [
-                            '$schema' => 'http://json-schema.org/draft-04/schema#',
-                            'type' => 'object',
+                        'schema'      => [
+                            '$schema'    => 'http://json-schema.org/draft-04/schema#',
+                            'type'       => 'object',
                             'properties' => [
                                 'code' => [
-                                    'type' => 'number',
+                                    'type'        => 'number',
                                     'description' => '0--失败 1--成功',
                                 ],
                                 'status' => [
-                                    'type' => 'string',
+                                    'type'        => 'string',
                                     'description' => '状态值',
                                 ],
                             ],
@@ -630,46 +630,46 @@ CODE;
                 foreach ($tablePk as $v) {
                     if (empty($hasPk[$v])) {
                         $deleteParameters[] = [
-                            'name' => $v,
-                            'in' => 'query',
-                            'required' => true,
+                            'name'        => $v,
+                            'in'          => 'query',
+                            'required'    => true,
                             'description' => '',
-                            'type' => 'string',
+                            'type'        => 'string',
                         ];
                     }
                 }
             } else {
                 if (empty($hasPk[$tablePk])) {
                     $deleteParameters[] = [
-                        'name' => $tablePk,
-                        'in' => 'query',
-                        'required' => true,
+                        'name'        => $tablePk,
+                        'in'          => 'query',
+                        'required'    => true,
                         'description' => '',
-                        'type' => 'string',
+                        'type'        => 'string',
                     ];
                 }
             }
             $paths[$path]['delete'] = [
-                'tags' => ['临时分类'],
-                'summary' => '删除' . $showName,
+                'tags'        => ['临时分类'],
+                'summary'     => '删除' . $showName,
                 'description' => '',
-                'consumes' => [
+                'consumes'    => [
                     'multipart/form-data',
                 ],
                 'parameters' => $deleteParameters,
-                'responses' => [
+                'responses'  => [
                     '200' => [
                         'description' => 'successful operation',
-                        'schema' => [
-                            '$schema' => 'http://json-schema.org/draft-04/schema#',
-                            'type' => 'object',
+                        'schema'      => [
+                            '$schema'    => 'http://json-schema.org/draft-04/schema#',
+                            'type'       => 'object',
                             'properties' => [
                                 'code' => [
-                                    'type' => 'number',
+                                    'type'        => 'number',
                                     'description' => '0--失败 1--成功',
                                 ],
                                 'status' => [
-                                    'type' => 'string',
+                                    'type'        => 'string',
                                     'description' => '状态值',
                                 ],
                             ],
@@ -682,9 +682,9 @@ CODE;
 
         $json = [
             'swagger' => '2.0',
-            'tags' => [
+            'tags'    => [
                 [
-                    'name' => '临时分类',
+                    'name'        => '临时分类',
                     'description' => '公共分类',
                 ],
             ],
@@ -695,8 +695,8 @@ CODE;
             $client = new Client(['base_uri' => $this->config['api_uri']]);
             $response = $client->request('POST', '/api/open/import_data', [
                 'form_params' => [
-                    'json' => json_encode($json),
-                    'type' => 'swagger',
+                    'json'  => json_encode($json),
+                    'type'  => 'swagger',
                     'merge' => 'normal',
                     'token' => $this->config['api_token'],
                 ],
@@ -706,7 +706,7 @@ CODE;
                 'http_errors' => false,
             ]);
             $code = $response->getStatusCode();
-            if ($code == 200) {
+            if (200 == $code) {
                 $body = json_decode((string) $response->getBody(), true);
                 return $body['errmsg'];
             }
@@ -757,7 +757,7 @@ CODE;
                     $addRule .= "        '{$v['name']}|{$v['label']}' => 'require',\n";
                 }
             }
-            if ($v['search'] == true) {
+            if (true == $v['search']) {
                 switch ($v['business']) {
                     case 'date':
                     case 'datetime':
@@ -853,10 +853,10 @@ CODE;
             if (in_array('查', $v['curd'])) {
                 $tableColumns[] = [
                     'title' => $v['label'],
-                    'key' => $v['name'],
+                    'key'   => $v['name'],
                 ];
             }
-            if ($v['search'] == true) {
+            if (true == $v['search']) {
                 $tmpTpl = $tpl['search']['text'];
                 if (!empty($tpl['search'][$v['business']])) {
                     $tmpTpl = $tpl['search'][$v['business']];
@@ -867,7 +867,7 @@ CODE;
         }
         $tableColumns[] = [
             'title' => '操作',
-            'slot' => 'action',
+            'slot'  => 'action',
             'width' => 150,
             'align' => 'center',
         ];

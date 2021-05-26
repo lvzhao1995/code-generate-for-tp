@@ -85,13 +85,13 @@ trait Curd
     {
         $whereData = [];
         foreach ($params as $k => $v) {
-            if ($v !== '') {
+            if ('' !== $v) {
                 $data = isset($special[$k]) ? $special[$k] : $k;
                 $type = '';
                 if (is_array($data)) {
                     $field = $data[0];
                     $type = $data[1];
-                    if ($type == 'relation' && strpos($field, '.') !== false) {
+                    if ('relation' == $type && false !== strpos($field, '.')) {
                         $name = explode('.', $field, 2);
                         $name[0] = strtolower($name[0]);
                         $relationSearch = $name[0];
@@ -100,9 +100,9 @@ trait Curd
                     $field = $k;
                 }
                 $whereData[$k] = [
-                    'val' => $v,
+                    'val'   => $v,
                     'field' => $field,
-                    'type' => $type,
+                    'type'  => $type,
                 ];
             }
         }
@@ -117,7 +117,7 @@ trait Curd
     protected function setWhere($whereData, $model)
     {
         foreach ($whereData as $k => $v) {
-            if ($k != 'pageSize' && $k != 'RelationSearch') {
+            if ('pageSize' != $k && 'RelationSearch' != $k) {
                 $field = $v['field'] ?: $k;
                 switch ($v['type']) {
                     case 'select':
@@ -324,10 +324,10 @@ trait Curd
         $whereData = $this->search($request->only($onlyArr), $special, $relationSearch);
 
         $model = model($this->modelName);
-        $this->setWhere($whereData, $model);
-        $model->field($this->indexField);
+        $sql = $model->field($this->indexField);
+        $this->setWhere($whereData, $sql);
 
-        $list = $this->indexQuery($model)->order($this->orderField)->select();
+        $list = $this->indexQuery($sql)->order($this->orderField)->select();
 
         foreach ($list as $index => $item) {
             $this->pageEach($item, $index);

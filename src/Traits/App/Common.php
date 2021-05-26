@@ -18,9 +18,9 @@ trait Common
     public function notLogin()
     {
         $data = [
-            'code' => -1,
+            'code'   => -1,
             'status' => 'fail',
-            'msg' => '没有登录',
+            'msg'    => '没有登录',
         ];
         return json($data);
     }
