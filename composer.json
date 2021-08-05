@@ -14,7 +14,7 @@
         "ext-json": "*",
         "ext-mbstring": "*",
         "topthink/framework": "5.1.*",
-        "guzzlehttp/guzzle": "^6.3"
+        "guzzlehttp/guzzle": "^6.3 || ^7.0"
     },
     "autoload": {
         "psr-4": {
