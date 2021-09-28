@@ -8,7 +8,7 @@ use think\facade\Env;
 use think\facade\Route;
 use think\Loader;
 
-if (!class_exists('\\think\\Console')) {
+if (!class_exists('\\think\\Loader')) {
     return;
 }
 
