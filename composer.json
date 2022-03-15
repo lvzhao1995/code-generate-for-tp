@@ -26,7 +26,7 @@
     },
     "require-dev": {
         "brainmaestro/composer-git-hooks": "^2.8",
-        "friendsofphp/php-cs-fixer": "^2.15",
+        "friendsofphp/php-cs-fixer": "^3.4.0",
         "phpoffice/phpspreadsheet": "^1.10"
     },
     "scripts": {
@@ -46,5 +46,10 @@
     },
     "suggest": {
         "phpoffice/phpspreadsheet": "Required for using the export data"
+    },
+    "config": {
+        "allow-plugins": {
+            "topthink/think-installer": true
+        }
     }
 }

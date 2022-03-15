@@ -129,6 +129,16 @@ trait Curd
                     case 'time_end':
                         $model->whereTime($field, '<=', $v['val'] . ' 23:59:59');
                         break;
+                    case 'date_range':
+                    case 'time_range':
+                        if (!is_array($v['val']) || 2 != sizeof($v['val']) || empty($v['val'][0])) {
+                            break;
+                        }
+                        if ('date_range' == $v['type']) {
+                            $v['val'][1] = strtotime($v['val'][1]) + 86399;
+                        }
+                        $model->whereTime($field, 'between', $v['val']);
+                        break;
                     default:
                         $model->where($field, 'like', "%{$v['val']}%");
                         break;
