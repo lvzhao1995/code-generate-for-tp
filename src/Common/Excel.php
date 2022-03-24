@@ -35,6 +35,7 @@ class Excel
             } else {
                 $sheet->setCellValueByColumnAndRow(1, $row, $title);
             }
+            ++$row;
         }
 
         //设置列
@@ -46,7 +47,11 @@ class Excel
                         ->setWidth($columnName['width']);
                 }
                 //列名
-                $sheet->setCellValueByColumnAndRow($columnIndex++, $row, isset($columnName['title']) ? $columnName['title'] : '');
+                $sheet->setCellValueByColumnAndRow(
+                    $columnIndex++,
+                    $row,
+                    isset($columnName['title']) ? $columnName['title'] : ''
+                );
             } else {
                 $sheet->setCellValueByColumnAndRow($columnIndex++, $row, $columnName);
             }
@@ -61,7 +66,11 @@ class Excel
                     $cell = $sheet->getCellByColumnAndRow($columnIndex, $row);
                     call_user_func_array($columnSetting['callback'], [$cell, $item, $columnIndex]);
                 } else {
-                    $sheet->setCellValueByColumnAndRow($columnIndex, $row, isset($item[$columnKey]) ? $item[$columnKey] : '');
+                    $sheet->setCellValueByColumnAndRow(
+                        $columnIndex,
+                        $row,
+                        isset($item[$columnKey]) ? $item[$columnKey] : ''
+                    );
                 }
                 ++$columnIndex;
             }
