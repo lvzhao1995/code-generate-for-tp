@@ -7,6 +7,8 @@ use think\Db;
 use think\db\Query;
 use think\exception\DbException;
 use think\exception\HttpResponseException;
+use think\facade\Config;
+use think\Loader;
 use think\Model;
 use think\Request;
 use think\response\Json;
@@ -77,7 +79,11 @@ trait Curd
 
         $sql = $model->with($this->with)->order($this->order);
         if ($this->cache) {
-            $sql = $sql->cache(true, 0, $this->model . '_cache_data');
+            $table = $model->getTable();
+            $prefix = Config::get('database.prefix');
+            $name = preg_replace('/^' . $prefix . '/', '', $table);
+            $modelName = Loader::parseName($name, 1);
+            $sql = $sql->cache(true, 0, $modelName . '_cache_data');
         }
 
         //获取主键值

@@ -10,6 +10,8 @@ use think\db\exception\ModelNotFoundException;
 use think\db\Query;
 use think\exception\DbException;
 use think\exception\HttpResponseException;
+use think\facade\Config;
+use think\Loader;
 use think\Model;
 use think\Request;
 use think\Validate;
@@ -63,7 +65,11 @@ trait Curd
         $sql = $model->field($this->indexField);
         $this->setWhere($whereData, $sql);
         if ($this->cache) {
-            $sql->cache(true, 0, $this->modelName . '_cache_data');
+            $table = $model->getTable();
+            $prefix = Config::get('database.prefix');
+            $name = preg_replace('/^' . $prefix . '/', '', $table);
+            $modelName = Loader::parseName($name, 1);
+            $sql->cache(true, 0, $modelName . '_cache_data');
         }
 
         $list = $this->indexQuery($sql)->order($this->orderField)->paginate($pageSize)->each(

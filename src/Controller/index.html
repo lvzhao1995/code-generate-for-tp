@@ -1,591 +1,604 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <title>ThinkPHP代码生成工具</title>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
-    <link rel="stylesheet" href="//unpkg.com/iview/dist/styles/iview.css">
-    <script src="https://unpkg.com/iview@3.4.2/dist/iview.min.js"></script>
-    <script src="https://unpkg.com/axios@0.19.0/dist/axios.min.js"></script>
-    <style>
-        .header {
-            color: white;
-            text-align: center;
-        }
+  <meta charset="UTF-8">
+  <title>ThinkPHP代码生成工具</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@0.24.0/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/iview@3.5.4/dist/iview.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/iview@3.5.4/dist/styles/iview.min.css" rel="stylesheet">
+  <style>
+      .header {
+          color: white;
+          text-align: center;
+      }
 
-        .footer {
-            text-align: center;
-        }
+      .footer {
+          text-align: center;
+      }
 
-        .table-wrap {
-            margin-bottom: 20px;
-        }
+      .table-wrap {
+          margin-bottom: 20px;
+      }
 
-        .content {
-            padding: 20px;
-        }
-    </style>
+      .content {
+          padding: 20px;
+      }
+  </style>
 </head>
 <body>
 <div id="app">
-    <i-layout>
-        <i-header class="header">
-            <h3>
-                {{titleStatus == 1 ? `代码生成工具（${create.selectVal}）`: '框架关联关系生成'}}
-                <Dropdown @on-click="dropdownClick">
-                    <a href="javascript:void(0)">
-                        功能切换
-                        <Icon type="ios-arrow-down"></Icon>
-                    </a>
-                    <DropdownMenu slot="list">
-                        <dropdown-item name="1">代码生成</dropdown-item>
-                        <dropdown-item name="2">关联关系</dropdown-item>
-                    </DropdownMenu>
-                </Dropdown>
-            </h3>
-        </i-header>
-        <i-content class="content" v-if="titleStatus==1">
-            <alert closable>* 模型位于application/common/model目录，前后台通用。</alert>
-            <div class="table-wrap">
-                <span>业务选择：</span>
-                <radio-group type="button" v-model="create.selectVal">
-                    <Radio label="前台">前台</Radio>
-                    <Radio label="后台">后台</Radio>
-                </radio-group>
-            </div>
-            <div class="table-wrap">
-                数据表：
-                <i-select style="width:200px" v-model="tableName" @on-change="tableChange" filterable>
-                    <i-option v-for="item in tableData" :value="item.value" :key="item.value">{{ item.label }}
-                    </i-option>
-                </i-select>
-            </div>
-            <div style="margin-bottom: 20px">
-                <checkbox-group v-model="create.fruit">
-                    创建：
-                    <Checkbox label="控制器"></Checkbox>
-                    <Checkbox label="模型"></Checkbox>
-                    <Checkbox label="视图" v-if="create.selectVal == '后台'"></Checkbox>
-                </checkbox-group>
-            </div>
-            <div style="margin-bottom: 20px">
-                控制器名称：
-                <i-input v-model="controllerName" prefix="ios-construct" placeholder="如果不填写则按照表名命名"
-                         style="width: auto"/>
-            </div>
-            <div style="margin-bottom: 20px">
-                展示名称：
-                <i-input v-model="showName" placeholder="展示名称"
-                         style="width: auto"/>
-            </div>
-            <div style="margin-bottom: 20px">
-                <checkbox-group v-model="create.model">
-                    模型选项：
-                    <Checkbox label="自动时间戳"></Checkbox>
-                    <Checkbox label="开启软删"></Checkbox>
-                </checkbox-group>
-            </div>
-            <div style="margin-bottom: 20px" v-if="create.selectVal == '前台'">
-                <checkbox-group v-model="create.allow">
-                    允许的操作：
-                    <Checkbox label="get"></Checkbox>
-                    <Checkbox label="post"></Checkbox>
-                    <Checkbox label="put"></Checkbox>
-                    <Checkbox label="delete"></Checkbox>
-                </checkbox-group>
-            </div>
-            <div style="margin-bottom: 20px" v-if="create.selectVal == '前台'">
-                登录访问：
-                <radio-group v-model="create.login" type="button">
-                    <Radio label="是"></Radio>
-                    <Radio label="否"></Radio>
-                </radio-group>
-            </div>
-            <i-table border :columns="columns" :data="create.pageData">
-                <template slot-scope="{ row, index }" slot="showName">
-                    <i-input type="text" v-model="create.pageData[index].label"/>
-                </template>
-                <template slot-scope="{ row, index }" slot="curd">
-                    <checkbox-group v-model="create.pageData[index].curd">
-                        <Checkbox label="增"></Checkbox>
-                        <Checkbox label="改"></Checkbox>
-                        <Checkbox :label="create.selectVal == '前台'?'列表':'查'"></Checkbox>
-                        <Checkbox label="详情" v-if="create.selectVal == '前台'"></Checkbox>
-                    </checkbox-group>
-                </template>
-                <template slot-scope="{ row, index }" slot="search">
-                    <i-switch v-model="create.pageData[index].search">
-                        <span slot="open">是</span>
-                        <span slot="close">否</span>
-                    </i-switch>
-                </template>
-                <template slot-scope="{ row, index }" slot="business">
-                    <i-select v-model="create.pageData[index].business" :transfer="true">
-                        <i-option value="text">文本</i-option>
-                        <i-option value="number">整数</i-option>
-                        <i-option value="date">日期选择</i-option>
-                        <i-option value="datetime">日期时间选择</i-option>
-                        <i-option value="select">选择器</i-option>
-                        <i-option value="uploadImage">上传图片</i-option>
-                        <i-option value="ueditor">富文本编辑器</i-option>
-                        <i-option value="textarea">多行文本</i-option>
-                    </i-select>
-                </template>
-                <template slot-scope="{ row, index }" slot="sort">
-                    <i-select v-model="create.pageData[index].sort" :transfer="true" :clearable="true">
-                        <i-option value="asc">升序</i-option>
-                        <i-option value="desc">降序</i-option>
-                    </i-select>
-                </template>
-                <template slot-scope="{ row, index }" slot="require">
-                    <i-switch v-model="create.pageData[index].require">
-                        <span slot="open">是</span>
-                        <span slot="close">否</span>
-                    </i-switch>
-                </template>
-                <template slot-scope="{ row, index }" slot="autotype">
-                    <i-select v-model="create.pageData[index].autotype" :transfer="true" :clearable="true">
-                        <i-option value="serialize">serialize</i-option>
-                        <i-option value="json">json</i-option>
-                        <i-option value="datetime">datetime</i-option>
-                        <i-option value="timestamp">timestamp</i-option>
-                        <i-option value="integer">integer</i-option>
-                        <i-option value="float">float</i-option>
-                        <i-option value="boolean">boolean</i-option>
-                        <i-option value="array">array</i-option>
-                        <i-option value="object">object</i-option>
-                    </i-select>
-                </template>
-            </i-table>
-            <Alert v-show="showRouterTips">
-                请在router.js中合适的位置添加路由，以下代码仅供参考：
-                <template slot="desc"><span v-html="routerTips"></span></template>
-            </Alert>
-            <i-button type="primary" long style="margin-top: 20px" size="large" :disabled="buttonDisabled"
-                      @click.native="generate">生成代码
-            </i-button>
-        </i-content>
-        <i-content class="content" v-else>
-            <div class="table-wrap">
-                模型：
-                <i-select style="width:200px" v-model="tableName" @on-change="modelChange">
-                    <i-option v-for="item in modelData" :value="item.value" :key="item.value">{{ item.label }}
-                    </i-option>
-                </i-select>
-            </div>
-            <i-table border :columns="columns" :data="create.pageData">
-                <template slot-scope="{ row,index }" slot="relation">
-                    <Cascader :data="relationData" transfer v-model="create.pageData[index].business"
-                              @on-change="(value, selectedData) => {relationDataChange(value, selectedData,index)}"></Cascader>
-                </template>
-                <template slot-scope="{ row,index }" slot="table">
-                    <Cascader :data="row.business[0] == 'mvm' ? mvmModeldata : cascaderData" change-on-select transfer
-                              v-model="create.pageData[index].table"
-                              :disabled="create.pageData[index].selectStatus == false ? false : true"
-                              @on-change="cascaderChange"
-                              :load-data="loadData"></Cascader>
-                </template>
-                <template slot-scope="{ row,index }" slot="fun_name">
-                    <i-input v-model="create.pageData[index].fun_name" placeholder="关联方法名，如果不输入默认为关联的模型命名"/>
-                </template>
-            </i-table>
-            <i-button type="primary" long style="margin-top: 20px" size="large" :disabled="relevanceButton"
-                      @click.native="generateRelation">生成关联关系
-            </i-button>
-        </i-content>
-    </i-layout>
+  <i-layout>
+    <i-header class="header">
+      <h3>
+        {{titleStatus == 1 ? `代码生成工具（${create.selectVal}）` : "框架关联关系生成"}}
+        <Dropdown @on-click="dropdownClick">
+          <a href="javascript:void(0)">
+            功能切换
+            <Icon type="ios-arrow-down"></Icon>
+          </a>
+          <DropdownMenu slot="list">
+            <dropdown-item name="1">代码生成</dropdown-item>
+            <dropdown-item name="2">关联关系</dropdown-item>
+          </DropdownMenu>
+        </Dropdown>
+      </h3>
+    </i-header>
+    <i-content class="content" v-if="titleStatus==1">
+      <alert closable>* 模型位于application/common/model目录，前后台通用。</alert>
+      <i-form>
+        <div class="table-wrap">
+          <span>业务选择：</span>
+          <radio-group type="button" v-model="create.selectVal">
+            <Radio label="前台">前台</Radio>
+            <Radio label="后台">后台</Radio>
+          </radio-group>
+        </div>
+        <div class="table-wrap">
+          数据表：
+          <i-select @on-change="tableChange" filterable style="width:200px" v-model="tableName">
+            <i-option :key="item.value" :value="item.value" v-for="item in tableData">{{ item.label }}
+            </i-option>
+          </i-select>
+          <i-button @click="getTableData">刷新</i-button>
+        </div>
+        <div style="margin-bottom: 20px">
+          <checkbox-group v-model="create.fruit">
+            创建：
+            <Checkbox label="控制器"></Checkbox>
+            <Checkbox label="模型"></Checkbox>
+            <Checkbox label="视图" v-if="create.selectVal == '后台'"></Checkbox>
+          </checkbox-group>
+        </div>
+        <div class="table-wrap" v-if="create.selectVal == '后台'&&create.fruit.includes('视图')">
+          前端框架：
+          <radio-group type="button" v-model="create.vueTemplate">
+            <Radio label="iview">view-design(vue2)</Radio>
+            <Radio label="element">element-plus(vue3+ts)</Radio>
+          </radio-group>
+        </div>
+        <div style="margin-bottom: 20px">
+          控制器名称：
+          <i-input placeholder="如果不填写则按照表名命名" prefix="ios-construct" style="width: auto"
+                   v-model="controllerName"/>
+        </div>
+        <div style="margin-bottom: 20px">
+          展示名称：
+          <i-input placeholder="展示名称" style="width: auto"
+                   v-model="showName"/>
+        </div>
+        <div style="margin-bottom: 20px">
+          <checkbox-group v-model="create.model">
+            模型选项：
+            <Checkbox label="自动时间戳"></Checkbox>
+            <Checkbox label="开启软删"></Checkbox>
+          </checkbox-group>
+        </div>
+        <div style="margin-bottom: 20px" v-if="create.selectVal == '前台'">
+          <checkbox-group v-model="create.allow">
+            允许的操作：
+            <Checkbox label="get"></Checkbox>
+            <Checkbox label="post"></Checkbox>
+            <Checkbox label="put"></Checkbox>
+            <Checkbox label="delete"></Checkbox>
+          </checkbox-group>
+        </div>
+        <div style="margin-bottom: 20px" v-if="create.selectVal == '前台'">
+          登录访问：
+          <radio-group type="button" v-model="create.login">
+            <Radio label="是"></Radio>
+            <Radio label="否"></Radio>
+          </radio-group>
+        </div>
+        <i-table :columns="columns" :data="create.pageData" border>
+          <template slot="showName" slot-scope="{ row, index }">
+            <i-input type="text" v-model="create.pageData[index].label"/>
+          </template>
+          <template slot="curd" slot-scope="{ row, index }">
+            <checkbox-group v-model="create.pageData[index].curd">
+              <Checkbox label="增"></Checkbox>
+              <Checkbox label="改"></Checkbox>
+              <Checkbox :label="create.selectVal == '前台'?'列表':'查'"></Checkbox>
+              <Checkbox label="详情" v-if="create.selectVal == '前台'"></Checkbox>
+            </checkbox-group>
+          </template>
+          <template slot="search" slot-scope="{ row, index }">
+            <i-switch v-model="create.pageData[index].search">
+              <span slot="open">是</span>
+              <span slot="close">否</span>
+            </i-switch>
+          </template>
+          <template slot="business" slot-scope="{ row, index }">
+            <i-select :transfer="true" v-model="create.pageData[index].business">
+              <i-option value="text">文本</i-option>
+              <i-option value="number">整数</i-option>
+              <i-option value="date">日期选择</i-option>
+              <i-option value="datetime">日期时间选择</i-option>
+              <i-option value="select">选择器</i-option>
+              <i-option value="uploadImage">上传图片</i-option>
+              <i-option value="ueditor">富文本编辑器</i-option>
+              <i-option value="textarea">多行文本</i-option>
+            </i-select>
+          </template>
+          <template slot="sort" slot-scope="{ row, index }">
+            <i-select :clearable="true" :transfer="true" v-model="create.pageData[index].sort">
+              <i-option value="asc">升序</i-option>
+              <i-option value="desc">降序</i-option>
+            </i-select>
+          </template>
+          <template slot="require" slot-scope="{ row, index }">
+            <i-switch v-model="create.pageData[index].require">
+              <span slot="open">是</span>
+              <span slot="close">否</span>
+            </i-switch>
+          </template>
+          <template slot="autotype" slot-scope="{ row, index }">
+            <i-select :clearable="true" :transfer="true" v-model="create.pageData[index].autotype">
+              <i-option value="serialize">serialize</i-option>
+              <i-option value="json">json</i-option>
+              <i-option value="datetime">datetime</i-option>
+              <i-option value="timestamp">timestamp</i-option>
+              <i-option value="integer">integer</i-option>
+              <i-option value="float">float</i-option>
+              <i-option value="boolean">boolean</i-option>
+              <i-option value="array">array</i-option>
+              <i-option value="object">object</i-option>
+            </i-select>
+          </template>
+        </i-table>
+        <Alert v-show="showRouterTips">
+          请在router.js中合适的位置添加路由，以下代码仅供参考：
+          <template slot="desc"><span v-html="routerTips"></span></template>
+        </Alert>
+        <i-button :disabled="buttonDisabled" @click.native="generate" long size="large" style="margin-top: 20px"
+                  type="primary">生成代码
+        </i-button>
+      </i-form>
+    </i-content>
+    <i-content class="content" v-else>
+      <div class="table-wrap">
+        模型：
+        <i-select @on-change="modelChange" style="width:200px" v-model="tableName">
+          <i-option :key="item.value" :value="item.value" v-for="item in modelData">{{ item.label }}
+          </i-option>
+        </i-select>
+      </div>
+      <i-table :columns="columns" :data="create.pageData" border>
+        <template slot="relation" slot-scope="{ row,index }">
+          <Cascader :data="relationData"
+                    @on-change="(value, selectedData) => {relationDataChange(value, selectedData,index)}" transfer
+                    v-model="create.pageData[index].business"></Cascader>
+        </template>
+        <template slot="table" slot-scope="{ row,index }">
+          <Cascader :data="row.business[0] == 'mvm' ? mvmModeldata : cascaderData"
+                    :disabled="create.pageData[index].selectStatus == false ? false : true" :load-data="loadData"
+                    @on-change="cascaderChange"
+                    change-on-select
+                    transfer
+                    v-model="create.pageData[index].table"></Cascader>
+        </template>
+        <template slot="fun_name" slot-scope="{ row,index }">
+          <i-input placeholder="关联方法名，如果不输入默认为关联的模型命名" v-model="create.pageData[index].fun_name"/>
+        </template>
+      </i-table>
+      <i-button :disabled="relevanceButton" @click.native="generateRelation" long size="large" style="margin-top: 20px"
+                type="primary">生成关联关系
+      </i-button>
+    </i-content>
+  </i-layout>
 </div>
 </body>
 <script>
-    new Vue({
-        el: '#app',
-        data() {
-            return {
-                titleStatus: 1,//1:代码生成，2：关联关系
-                create: {
-                    fruit: ['控制器', '模型', '视图'],//创建模型，视图，控制器复选框
-                    model: [],
-                    pageData: [],//页面数据
-                    selectVal: '后台',
-                    delete: '否',
-                    time: '否',
-                    login: '是',
-                    allow: []
-                },
-                controllerName: '',//控制器名称
-                showName: '',
-                tableName: '',//数据表名
-                tableData: [],//数据表数据
-                buttonDisabled: true,//生成代码按钮
-                relevanceButton: true,//生成关联关系按钮
-                columns: [],
-                cascaderData: [],
-                modelData: [],
-                mvmModeldata: [],
-                relationData: [],
-                showRouterTips: false,
-                routerTips: ''
-            }
+new Vue({
+  el: "#app",
+  data() {
+    return {
+      titleStatus: 1,//1:代码生成，2：关联关系
+      create: {
+        fruit: ["控制器", "模型", "视图"],//创建模型，视图，控制器复选框
+        model: [],
+        pageData: [],//页面数据
+        selectVal: "后台",
+        delete: "否",
+        time: "否",
+        login: "是",
+        allow: [],
+        vueTemplate: "element"
+      },
+      controllerName: "",//控制器名称
+      showName: "",
+      tableName: "",//数据表名
+      tableData: [],//数据表数据
+      buttonDisabled: true,//生成代码按钮
+      relevanceButton: true,//生成关联关系按钮
+      columns: [],
+      cascaderData: [],
+      modelData: [],
+      mvmModeldata: [],
+      relationData: [],
+      showRouterTips: false,
+      routerTips: ""
+    }
+  },
+  methods: {
+    relationDataChange(value, selectedData, index) {
+      this.create.pageData[index].table = [];
+      this.create.pageData[index].selectStatus = false
+    },
+    cascaderChange() {
+      this.relevanceButton = false
+    },
+    dropdownClick(name) {
+      this.titleStatus = name
+    },
+    getColumns() {
+      let data = [
+        {
+          title: "字段",
+          key: "name",
         },
-        methods: {
-            relationDataChange(value, selectedData, index) {
-                this.create.pageData[index].table = [];
-                this.create.pageData[index].selectStatus = false
-            },
-            cascaderChange() {
-                this.relevanceButton = false
-            },
-            dropdownClick(name) {
-                this.titleStatus = name
-            },
-            getColumns() {
-                let data = [
-                    {
-                        title: '字段',
-                        key: 'name',
-                    },
-                    {
-                        title: '类型',
-                        key: 'type'
-                    },
-                    {
-                        title: '注释',
-                        key: 'comment'
-                    },
-                ];
-                if (this.titleStatus == 1) {
-                    data.push({
-                        title: '名称',
-                        slot: 'showName',
-                    }, {
-                        title: '操作',
-                        slot: 'curd',
-                    });
-                    if (this.create.selectVal == '后台') {
-                        data.push(
-                            {
-                                title: '检索',
-                                slot: 'search',
-                            },
-                            {
-                                title: '业务类型',
-                                slot: 'business',
-                            })
-                    }
-                    data.push({
-                            title: '排序',
-                            slot: 'sort',
-                        },
-                        {
-                            title: '必填',
-                            width: 80,
-                            align: 'center',
-                            slot: 'require'
-                        },
-                        {
-                            title: '类型自动转换',
-                            slot: 'autotype',
-                        })
-                }
-                if (this.titleStatus == 2) {
-                    data.push(
-                        {
-                            title: '关联关系/中间表',
-                            slot: 'relation'
-                        },
-                        {
-                            title: '关联模型/外键',
-                            slot: 'table'
-                        },
-                        {
-                            title: '关联方法名',
-                            slot: 'fun_name'
-                        }
-                    )
-                }
-                return data
-            },
-            getTableData() {
-                //获取数据表数据
-                axios.get('/generate/showTables').then(
-                    res => {
-                        if (res.data.code) {
-                            this.tableData = res.data.data;
-                            this.relationData = [
-                                {
-                                    value: '1v1',
-                                    label: '一对一',
-                                },
-                                {
-                                    value: '1vm',
-                                    label: '一对多',
-                                },
-                                {
-                                    value: 'mvm',
-                                    label: '多对多',
-                                    children: res.data.data
-                                }
-                            ]
-                        } else {
-                            this.$Message.error(res.data.msg);
-                        }
-                    }
-                )
-            },
-            clone(obj) {
-                let buf;
-                if (obj instanceof Array) {
-                    buf = [];
-                    let i = obj.length;
-                    while (i--) {
-                        buf[i] = this.clone(obj[i]);
-                    }
-                    return buf;
-                } else if (obj instanceof Object) {
-                    buf = {};
-                    for (let k in obj) {
-                        buf[k] = this.clone(obj[k]);
-                    }
-                    return buf;
-                }
-                return obj;
-            },
-            getModelData() {
-                axios.get('/generate/getModelData').then(
-                    res => {
-                        if (res.data.code) {
-                            this.cascaderData = res.data.data;
-                            this.modelData = res.data.data;
-                            this.mvmModeldata = this.clone(res.data.data);
-                            for (let x in this.mvmModeldata) {
-                                delete this.mvmModeldata[x].loading
-                            }
-                        }
-                    }
-                )
-            },
-            getTableFieldData(table, isModel) {
-                //获取对应数据表的字段数据
-                axios.post('/generate/getTableFieldData', {table, isModel}).then(
-                    res => {
-                        if (res.data.code) {
-                            res.data.data.map((subItem) => {
-                                //模型参数
-                                if (subItem.name == 'create_time' || subItem.name == 'update_time') {
-                                    if (this.create.model.indexOf('自动时间戳') < 0) {
-                                        this.create.model.push('自动时间戳');
-                                    }
-                                } else if (subItem.name == 'delete_time') {
-                                    if (this.create.model.indexOf('开启软删') < 0) {
-                                        this.create.model.push('开启软删');
-                                    }
-                                }
-                                //操作
-                                if (subItem.name == 'create_time') {
-                                    subItem.curd = ['查', '列表', '详情'];
-                                } else if (subItem.name == 'update_time' || subItem.name == 'delete_time') {
-                                    subItem.curd = [];
-                                } else if (subItem.name == 'id') {
-                                    subItem.curd = ['查', '列表', '详情'];
-                                } else {
-                                    subItem.curd = ['增', '列表', '改', '查', '详情'];
-                                }
-                                //业务类型
-                                if (subItem.name == 'create_time' || subItem.name == 'update_time' || subItem.name == 'delete_time') {
-                                    subItem.business = '';
-                                    subItem.require = false;
-                                } else if (subItem.name.search('time') >= 0) {
-                                    subItem.business = 'datetime';
-                                } else if (subItem.name.search('image') >= 0) {
-                                    subItem.business = 'uploadImage';
-                                } else if (subItem.name == 'content' || subItem.type.search('text') == 0) {
-                                    subItem.business = 'ueditor';
-                                } else if (subItem.name == 'status' || subItem.name.search('_id') > 0) {
-                                    subItem.business = 'select';
-                                } else if (subItem.type.search('char') >= 0 && subItem.length >= 256) {
-                                    subItem.business = 'textarea';
-                                } else if (subItem.type.search('int') >= 0) {
-                                    subItem.business = 'number';
-                                } else {
-                                    subItem.business = 'text';
-                                }
-                                //名称
-                                subItem.label = subItem.comment;
-                                //是否必填
-                                if (subItem.name == 'id') {
-                                    subItem.require = false;
-                                }
-                                //类型转换
-                                subItem.autotype = '';
-                                if (subItem.name == 'create_time' || subItem.name == 'update_time' || subItem.name == 'delete_time') {
-                                    subItem.autotype = '';
-                                } else if (subItem.name.search('time') >= 0) {
-                                    if (subItem.type.search('int') >= 0) {
-                                        subItem.autotype = 'timestamp';
-                                    } else if (subItem.type.search('date') >= 0) {
-                                        subItem.autotype = 'datetime';
-                                    }
-                                }
-                            });
-                            this.create.pageData = res.data.data
-                        } else {
-                            this.$Message.error(res.data.msg);
-                        }
-                    }
-                );
-            },
-            tableChange(table) {
-                //当选择框发生变化
-                this.create.fruit = ['控制器', '模型', '视图'];
-                this.create.model = [];
-                this.create.allow = ['get', 'post', 'put', 'delete'];
-                this.buttonDisabled = false;
-                this.getTableFieldData(table);
-                this.showRouterTips = false;
-            },
-            modelChange(model) {
-                //当选择框发生变化
-                this.getTableFieldData(model, true)
-            },
-            generate() {
-                //生成代码按钮
-                axios.post('/generate/generate', {
-                    data: this.create,
-                    tableName: this.tableName,
-                    controllerName: this.controllerName,
-                    showName: this.showName
-                }).then(
-                    res => {
-                        this.$Notice.open({
-                            title: '操作完成',
-                            desc: res.data.data.message
-                        });
-                        if (typeof res.data.data.router === 'string') {
-                            this.routerTips = res.data.data.router;
-                            this.showRouterTips = true;
-                        }
-                    }
-                );
-            },
-            generateRelation() {
-                //生成关联关系
-                axios.post('/generate/generateRelation', {
-                    data: JSON.stringify(this.create),
-                    tableName: this.tableName,
-                    controllerName: this.controllerName
-                }).then(
-                    res => {
-                        if (res.data.code) {
-                            this.$Message.success('关联关系生成成功')
-                        } else {
-                            this.$Message.error(res.data.msg);
-                        }
-                    }
-                );
-            },
-            loadData(item, callback) {
-                //获取对应数据表的字段数据
-                item.loading = true;
-                axios.post('/generate/getTableFieldData', {table: item.value, isModel: true}).then(
-                    res => {
-                        if (res.data.code) {
-                            for (let x in res.data.data) {
-                                item.children.push({
-                                    value: res.data.data[x].name,
-                                    label: res.data.data[x].name
-                                })
-                            }
-                        } else {
-                            this.$Message.error(res.data.msg);
-                        }
-                        item.loading = false;
-                        callback();
-                    }
-                )
-            }
+        {
+          title: "类型",
+          key: "type"
         },
-        computed: {
-            getSelectVal() {
-                return this.create.selectVal
-            },
-            getModel() {
-                return this.create.model
-            }
+        {
+          title: "注释",
+          key: "comment"
         },
-        watch: {
-            getSelectVal(new_val, old_val) {
-                this.create.selectVal = new_val;
-                this.columns = this.getColumns()
+      ];
+      if (this.titleStatus == 1) {
+        data.push({
+          title: "名称",
+          slot: "showName",
+        }, {
+          title: "操作",
+          slot: "curd",
+        });
+        if (this.create.selectVal == "后台") {
+          data.push(
+            {
+              title: "检索",
+              slot: "search",
             },
-            titleStatus(new_val, old_val) {
-                if (new_val === 2) {
-                    this.getModelData();
-                    this.$Notice.info({
-                        title: '关于生成关系说明',
-                        desc: '<h4>1、如果模型中方法已经存在不替换，不会被替换</h4><h4>2、生成关联关系后，不会自动添加到控制器，需要手动实现</h4><h4>3、关联方法名按照关联表的表名命名</h4>'
-                    });
-                }
-                this.columns = this.getColumns()
-            },
-            getModel(new_val, old_val) {
-                let updateTips = false;
-                let createTips = false;
-                let deleteTips = false;
-                for (let x in this.create.pageData) {
-                    if (this.create.pageData[x].name === 'create_time') {
-                        createTips = this.create.pageData[x].type
-                    }
-                    if (this.create.pageData[x].name === 'update_time') {
-                        updateTips = this.create.pageData[x].type
-                    }
-                    if (this.create.pageData[x].name === 'delete_time') {
-                        deleteTips = this.create.pageData[x].type
-                    }
-                }
-                if (new_val.indexOf('自动时间戳') >= 0 && old_val.indexOf('自动时间戳') < 0) {
-                    if (!createTips) {
-                        this.$Notice.info({
-                            title: '关于自动维护时间戳',
-                            desc: '表中没有create_time字段，如果执意开启，请自行设置'
-                        });
-                    } else if (createTips.indexOf('int') < 0) {
-                        this.$Notice.info({
-                            title: '关于自动维护时间戳',
-                            desc: '表中的create_time字段不是数字类型，如果执意开启，请自行设置'
-                        });
-                    }
-                    if (!updateTips) {
-                        this.$Notice.info({
-                            title: '关于自动维护时间戳',
-                            desc: '表中没有update_time字段，如果执意开启，请自行设置'
-                        });
-                    } else if (updateTips.indexOf('int') < 0) {
-                        this.$Notice.info({
-                            title: '关于自动维护时间戳',
-                            desc: '表中的update_time字段不是数字类型，如果执意开启，请自行设置'
-                        });
-                    }
-                }
-                if (new_val.indexOf('开启软删') >= 0 && old_val.indexOf('开启软删') < 0) {
-                    if (!deleteTips) {
-                        this.$Notice.info({
-                            title: '关于软删',
-                            desc: '表中没有delete_time字段，如果执意开启，请自行设置'
-                        });
-                    } else if (deleteTips.indexOf('int') < 0) {
-                        this.$Notice.info({
-                            title: '关于软删',
-                            desc: '表中的delete_time字段不是数字类型，如果执意开启，请自行设置'
-                        });
-                    }
-                }
-            }
-        },
-        created() {
-            this.getModelData();
-            this.getTableData();
-            this.columns = this.getColumns()
+            {
+              title: "业务类型",
+              slot: "business",
+            })
         }
-    })
+        data.push({
+            title: "排序",
+            slot: "sort",
+          },
+          {
+            title: "必填",
+            width: 80,
+            align: "center",
+            slot: "require"
+          },
+          {
+            title: "类型自动转换",
+            slot: "autotype",
+          })
+      }
+      if (this.titleStatus == 2) {
+        data.push(
+          {
+            title: "关联关系/中间表",
+            slot: "relation"
+          },
+          {
+            title: "关联模型/外键",
+            slot: "table"
+          },
+          {
+            title: "关联方法名",
+            slot: "fun_name"
+          }
+        )
+      }
+      return data
+    },
+    getTableData() {
+      //获取数据表数据
+      axios.get("/generate/showTables").then(
+        res => {
+          if (res.data.code) {
+            this.tableData = res.data.data;
+            this.relationData = [
+              {
+                value: "1v1",
+                label: "一对一",
+              },
+              {
+                value: "1vm",
+                label: "一对多",
+              },
+              {
+                value: "mvm",
+                label: "多对多",
+                children: res.data.data
+              }
+            ]
+          } else {
+            this.$Message.error(res.data.msg);
+          }
+        }
+      )
+    },
+    clone(obj) {
+      let buf;
+      if (obj instanceof Array) {
+        buf = [];
+        let i = obj.length;
+        while (i--) {
+          buf[i] = this.clone(obj[i]);
+        }
+        return buf;
+      } else if (obj instanceof Object) {
+        buf = {};
+        for (let k in obj) {
+          buf[k] = this.clone(obj[k]);
+        }
+        return buf;
+      }
+      return obj;
+    },
+    getModelData() {
+      axios.get("/generate/getModelData").then(
+        res => {
+          if (res.data.code) {
+            this.cascaderData = res.data.data;
+            this.modelData = res.data.data;
+            this.mvmModeldata = this.clone(res.data.data);
+            for (let x in this.mvmModeldata) {
+              delete this.mvmModeldata[x].loading
+            }
+          }
+        }
+      )
+    },
+    getTableFieldData(table, isModel) {
+      //获取对应数据表的字段数据
+      axios.post("/generate/getTableFieldData", {table, isModel}).then(
+        res => {
+          if (res.data.code) {
+            res.data.data.map((subItem) => {
+              //模型参数
+              if (subItem.name == "create_time" || subItem.name == "update_time") {
+                if (this.create.model.indexOf("自动时间戳") < 0) {
+                  this.create.model.push("自动时间戳");
+                }
+              } else if (subItem.name == "delete_time") {
+                if (this.create.model.indexOf("开启软删") < 0) {
+                  this.create.model.push("开启软删");
+                }
+              }
+              //操作
+              if (subItem.name == "create_time") {
+                subItem.curd = ["查", "列表", "详情"];
+              } else if (subItem.name == "update_time" || subItem.name == "delete_time") {
+                subItem.curd = [];
+              } else if (subItem.name == "id") {
+                subItem.curd = ["查", "列表", "详情"];
+              } else {
+                subItem.curd = ["增", "列表", "改", "查", "详情"];
+              }
+              //业务类型
+              if (subItem.name == "create_time" || subItem.name == "update_time" || subItem.name == "delete_time") {
+                subItem.business = "";
+                subItem.require = false;
+              } else if (subItem.name.search("time") >= 0) {
+                subItem.business = "datetime";
+              } else if (subItem.name.search("image") >= 0) {
+                subItem.business = "uploadImage";
+              } else if (subItem.name == "content" || subItem.type.search("text") == 0) {
+                subItem.business = "ueditor";
+              } else if (subItem.name == "status" || subItem.name.search("_id") > 0) {
+                subItem.business = "select";
+              } else if (subItem.type.search("char") >= 0 && subItem.length >= 256) {
+                subItem.business = "textarea";
+              } else if (subItem.type.search("int") >= 0) {
+                subItem.business = "number";
+              } else {
+                subItem.business = "text";
+              }
+              //名称
+              subItem.label = subItem.comment;
+              //是否必填
+              if (subItem.name == "id") {
+                subItem.require = false;
+              }
+              //类型转换
+              subItem.autotype = "";
+              if (subItem.name == "create_time" || subItem.name == "update_time" || subItem.name == "delete_time") {
+                subItem.autotype = "";
+              } else if (subItem.name.search("time") >= 0) {
+                if (subItem.type.search("int") >= 0) {
+                  subItem.autotype = "timestamp";
+                } else if (subItem.type.search("date") >= 0) {
+                  subItem.autotype = "datetime";
+                }
+              }
+            });
+            this.create.pageData = res.data.data
+          } else {
+            this.$Message.error(res.data.msg);
+          }
+        }
+      );
+    },
+    tableChange(table) {
+      //当选择框发生变化
+      this.create.fruit = ["控制器", "模型", "视图"];
+      this.create.model = [];
+      this.create.allow = ["get", "post", "put", "delete"];
+      this.buttonDisabled = false;
+      this.getTableFieldData(table);
+      this.showRouterTips = false;
+    },
+    modelChange(model) {
+      //当选择框发生变化
+      this.getTableFieldData(model, true)
+    },
+    generate() {
+      //生成代码按钮
+      axios.post("/generate/generate", {
+        data: this.create,
+        tableName: this.tableName,
+        controllerName: this.controllerName,
+        showName: this.showName
+      }).then(
+        res => {
+          this.$Notice.open({
+            title: "操作完成",
+            desc: res.data.data.message
+          });
+          if (typeof res.data.data.router === "string") {
+            this.routerTips = res.data.data.router;
+            this.showRouterTips = true;
+          }
+        }
+      );
+    },
+    generateRelation() {
+      //生成关联关系
+      axios.post("/generate/generateRelation", {
+        data: JSON.stringify(this.create),
+        tableName: this.tableName,
+        controllerName: this.controllerName
+      }).then(
+        res => {
+          if (res.data.code) {
+            this.$Message.success("关联关系生成成功")
+          } else {
+            this.$Message.error(res.data.msg);
+          }
+        }
+      );
+    },
+    loadData(item, callback) {
+      //获取对应数据表的字段数据
+      item.loading = true;
+      axios.post("/generate/getTableFieldData", {table: item.value, isModel: true}).then(
+        res => {
+          if (res.data.code) {
+            for (let x in res.data.data) {
+              item.children.push({
+                value: res.data.data[x].name,
+                label: res.data.data[x].name
+              })
+            }
+          } else {
+            this.$Message.error(res.data.msg);
+          }
+          item.loading = false;
+          callback();
+        }
+      )
+    }
+  },
+  computed: {
+    getSelectVal() {
+      return this.create.selectVal
+    },
+    getModel() {
+      return this.create.model
+    }
+  },
+  watch: {
+    getSelectVal(new_val, old_val) {
+      this.create.selectVal = new_val;
+      this.columns = this.getColumns()
+    },
+    titleStatus(new_val, old_val) {
+      if (new_val === 2) {
+        this.getModelData();
+        this.$Notice.info({
+          title: "关于生成关系说明",
+          desc: "<h4>1、如果模型中方法已经存在不替换，不会被替换</h4><h4>2、生成关联关系后，不会自动添加到控制器，需要手动实现</h4><h4>3、关联方法名按照关联表的表名命名</h4>"
+        });
+      }
+      this.columns = this.getColumns()
+    },
+    getModel(new_val, old_val) {
+      let updateTips = false;
+      let createTips = false;
+      let deleteTips = false;
+      for (let x in this.create.pageData) {
+        if (this.create.pageData[x].name === "create_time") {
+          createTips = this.create.pageData[x].type
+        }
+        if (this.create.pageData[x].name === "update_time") {
+          updateTips = this.create.pageData[x].type
+        }
+        if (this.create.pageData[x].name === "delete_time") {
+          deleteTips = this.create.pageData[x].type
+        }
+      }
+      if (new_val.indexOf("自动时间戳") >= 0 && old_val.indexOf("自动时间戳") < 0) {
+        if (!createTips) {
+          this.$Notice.info({
+            title: "关于自动维护时间戳",
+            desc: "表中没有create_time字段，如果执意开启，请自行设置"
+          });
+        } else if (createTips.indexOf("int") < 0) {
+          this.$Notice.info({
+            title: "关于自动维护时间戳",
+            desc: "表中的create_time字段不是数字类型，如果执意开启，请自行设置"
+          });
+        }
+        if (!updateTips) {
+          this.$Notice.info({
+            title: "关于自动维护时间戳",
+            desc: "表中没有update_time字段，如果执意开启，请自行设置"
+          });
+        } else if (updateTips.indexOf("int") < 0) {
+          this.$Notice.info({
+            title: "关于自动维护时间戳",
+            desc: "表中的update_time字段不是数字类型，如果执意开启，请自行设置"
+          });
+        }
+      }
+      if (new_val.indexOf("开启软删") >= 0 && old_val.indexOf("开启软删") < 0) {
+        if (!deleteTips) {
+          this.$Notice.info({
+            title: "关于软删",
+            desc: "表中没有delete_time字段，如果执意开启，请自行设置"
+          });
+        } else if (deleteTips.indexOf("int") < 0) {
+          this.$Notice.info({
+            title: "关于软删",
+            desc: "表中的delete_time字段不是数字类型，如果执意开启，请自行设置"
+          });
+        }
+      }
+    }
+  },
+  created() {
+    this.getModelData();
+    this.getTableData();
+    this.columns = this.getColumns()
+  }
+})
 </script>
 </html>
